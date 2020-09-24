@@ -44,6 +44,7 @@ int main()
     double subTotalCompra[constante];      // Subtotal padrao do produto
     double prcntDescontoCompra[constante]; // Porcentagem do desconto
     double valorTotalVenda[constante];     // Valor final da venda
+    double relacaoValor[constante];
 
     printf("Bem vindo ao MVP do Sr. Oswaldo!\n");
     do
@@ -239,7 +240,7 @@ int main()
                     printf("Insira a quantidade de compras desejadas: -- ");
                     scanf("%d", &qtComprasARealizar);
                     fflush(stdin);
-                    contadorPadrao = 0;
+                    contadorPadrao = 1;
                     while (contadorPadrao < qtComprasARealizar)
                     {
                         cdCompra[vIndiceProduto] = vIndiceCompra;
@@ -261,7 +262,7 @@ int main()
                         {
                             printf("Produto encontrado: %s", nomeProduto[i]);
                             ableToProceed = 1;
-                            i = vIndiceProduto;
+                           // i = vIndiceProduto;
                         }
                     }
 
@@ -369,4 +370,31 @@ void cadastroProduto(int *cdProduto, char *nomeProduto[50], char *marcaProduto[5
 // Função de realizalção de venda
 void realizarCompra(int *cdCompra, double *relacaoCpfCliente, int *relacaoProduto, int *qtVenda, int *subTotalCompra, double *prcntDescontoCompra, double *valorTotalVenda, char *promptSimNao, char *promptCompare)
 {
+    // Recebendo dados da Compra
+    printf("\n###########");
+    printf("Iniciando compra");
+    printf("\n Insira o CPF do cliente: ");
+    scanf(relacaoCpfCliente);
+    fflush(stdin);
+
+    printf("\n Insira o codigo do Produto: ");
+    scanf(relacaoProduto);
+    fflush(stdin);   
+
+    printf("\n Insira a quantidade do Prduto: ");
+    scanf(qtVenda);
+    fflush(stdin); 
+
+
+    printf("\n\n##########\n");
+    printf("# Venda Executada com sucesso!\n");
+    printf("# Codigo da venda: %d\n", cdCompra);
+    printf("# Identificação do Cliente: %d\n", relacaoCpfCliente);
+    printf("# Código do Produto Vendido: %d\n", relacaoProduto);
+    printf("# Quantidade do Produto %d: %d\n", relacaoProduto, qtVenda);
+    printf("# Total da Compra: %0.02lf \n", subTotalCompra);
+    printf("# Desconto: %0.0lf\n", prcntDescontoCompra);
+    printf("# Valor à pagar: %0.02lf\n", valorTotalVenda);
+    printf("##########\n\n");
+
 }
