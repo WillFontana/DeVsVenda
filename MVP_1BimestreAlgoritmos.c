@@ -4,8 +4,6 @@
 void cadastroCliente(int *cdClient, char *nomeCliente[50], double *cpfCliente, char *sexoCliente[50], double *telefoneCliente, char *emailCliente[50], int *comprasRealizadas, int *vIndiceCliente);
 void cadastroProduto(int *cdProduto, char *nomeProduto[50], char *marcaProduto[50], char *modeloProduto[50], double *valorProduto, int *vIndiceProduto);
 
-void realizarCompra(int *cdCompra, double *relacaoCpfCliente, int *relacaoProduto, int *qtVenda, int *subTotalCompra, double *prcntDescontoCompra, double *valorTotalVenda, char *promptSimNao, char *promptCompare);
-
 int main()
 {
     // variaveis de controles
@@ -36,15 +34,14 @@ int main()
     double valorProduto[constante];    // Valor do Produto
 
     // Variaveis de compra
-    int qtComprasARealizar;                // Quantidades de compras que o usuario deseja fazer
+    int qtComprasARealizar[constante];     // Quantidades de compras que o usuario deseja fazer
     int cdCompra[constante];               // Identificação da compra do produto
-    double relacaoCpfCliente[constante];   // Relação da compra com o  usuario
+    int relacaoCliente[constante];         // Relação da compra com o  usuario
     int relacaoProduto[constante];         // Relação da compra com o produto
     int qtVenda[constante];                // Quantidade de produtos vendidos
     double subTotalCompra[constante];      // Subtotal padrao do produto
     double prcntDescontoCompra[constante]; // Porcentagem do desconto
     double valorTotalVenda[constante];     // Valor final da venda
-    double relacaoValor[constante];
 
     printf("Bem vindo ao MVP do Sr. Oswaldo!\n");
     do
@@ -232,49 +229,93 @@ int main()
             }
             else
             {
-                printf("Deseja realizar multiplas vendas (S/n)? ");
-                strlwr(gets(promptSimNao));
+                cdCompra[vIndiceCompra] = vIndiceCompra;
+                printf("Por favor insira o codigo de cadastro do produto: ");
+                scanf("%d", &relacaoProduto[vIndiceCompra]);
                 fflush(stdin);
-                if (strcmp(promptSimNao, promptCompare[0]) == 0)
+                contadorPadrao = 1;
+                while (contadorPadrao < vIndiceProduto)
                 {
-                    printf("Insira a quantidade de compras desejadas: -- ");
-                    scanf("%d", &qtComprasARealizar);
-                    fflush(stdin);
-                    contadorPadrao = 1;
-                    while (contadorPadrao < qtComprasARealizar)
+                    if (relacaoProduto[vIndiceCompra] == cdProduto[contadorPadrao])
                     {
-                        cdCompra[vIndiceProduto] = vIndiceCompra;
-                        realizarCompra(cdCompra[vIndiceCompra], &relacaoCpfCliente[vIndiceCompra], &relacaoProduto[vIndiceCompra], qtVenda[vIndiceCompra], &subTotalCompra[vIndiceCompra], &prcntDescontoCompra[vIndiceCompra], &valorTotalVenda[vIndiceCompra], promptSimNao, promptCompare);
-                        // Aumentamos a quantidade de compras realizadas
-                        vIndiceCompra++;
+                        printf("Produto encontrado: %s\n", nomeProduto[contadorPadrao]);
+                        ableToProceed = 1;
+                        contadorPadrao = vIndiceProduto + 1;
+                    }
+                    else
+                    {
+                        ableToProceed = 0;
                         contadorPadrao++;
+                    }
+                }
+                if (ableToProceed < 1)
+                {
+                    printf("Nao foram encontrados produtos com o codigo inserido!\n");
+                    printf("Deseja listar todos os produtos cadastrados (S/n)? \n");
+                    strlwr(gets(promptSimNao));
+                    fflush(stdin);
+                    if (strcmp(promptSimNao, promptCompare[0]) == 0)
+                    {
+                        /* Listar todos os produtos */
+                        for (int i = 1; i < vIndiceProduto; i++)
+                        {
+                            printf("\n\n##########\n");
+                            printf("#\n");
+                            printf("# Codigo de cadastro: %d\n", cdProduto[i]);
+                            printf("# Nome do Produto: %s\n", nomeProduto[i]);
+                            printf("# Marca do Produto: %s\n", marcaProduto[i]);
+                            printf("# Modelo do Produto: %s \n", modeloProduto[i]);
+                            printf("# Valor do Produto: %0.0lf\n", valorProduto[i]);
+                            printf("##########\n\n");
+                        }
+                    }
+                    else
+                    {
+                        printf("Retornando ao menu inicial!\n");
                     }
                 }
                 else
                 {
-                    cdCompra[vIndiceCompra] = vIndiceCompra;
-                    printf("Por favor insira o codigo de cadastro do produto: ");
-                    scanf("%d", &relacaoProduto[vIndiceCompra]);
-                    contadorPadrao = 0;
-                    for (size_t i = 0; i < vIndiceProduto; i++)
+                    printf("Agora por favor informe o codigo do cadastro do cliente: ");
+                    scanf("%d", &relacaoCliente[vIndiceCompra]);
+                    fflush(stdin);
+                    contadorPadrao = 1;
+                    while (contadorPadrao < vIndiceCliente)
                     {
-                        if (relacaoProduto[vIndiceCompra] == cdProduto[i])
+                        if (relacaoCliente[vIndiceCompra] == cdCliente[contadorPadrao])
                         {
-                            printf("Produto encontrado: %s", nomeProduto[i]);
+                            printf("Cliente encontrado: %s com cpf: %0.0lf\n", nomeCliente[contadorPadrao], cpfCliente[contadorPadrao]);
                             ableToProceed = 1;
-                           // i = vIndiceProduto;
+                            contadorPadrao = vIndiceCliente + 1;
+                        }
+                        else
+                        {
+                            ableToProceed = 0;
+                            contadorPadrao++;
                         }
                     }
-
-                    if (ableToProceed > 1)
+                    if (ableToProceed < 1)
                     {
-                        printf("Nao foram encontrados produtos com o codigo inserido!\n");
+                        printf("Nao foram encontrados clientes com o codigo inserido!\n");
                         printf("Deseja listar todos os produtos cadastrados (S/n)? \n");
                         strlwr(gets(promptSimNao));
                         fflush(stdin);
                         if (strcmp(promptSimNao, promptCompare[0]) == 0)
                         {
-                            /* Listar todos os produtos */
+                            /* Listando todos os clientes */
+                            for (int i = 1; i < vIndiceCliente; i++)
+                            {
+                                printf("\n\n##########\n");
+                                printf("#\n");
+                                printf("# Codigo de cadastro: %d\n", cdCliente[i]);
+                                printf("# Nome cadastrado: %s\n", nomeCliente[i]);
+                                printf("# Cpf cadastrado: %0.0lf\n", cpfCliente[i]);
+                                printf("# Sexo cadastrado: %s \n", sexoCliente[i]);
+                                printf("# Telefone de cadastro: %0.0lf\n", telefoneCliente[i]);
+                                printf("# Email de cadastro: %s\n", emailCliente[i]);
+                                printf("# Compras realizadas: %d\n", comprasRealizadas[i]);
+                                printf("##########\n\n");
+                            }
                         }
                         else
                         {
@@ -283,10 +324,60 @@ int main()
                     }
                     else
                     {
-                    }
+                        ableToProceed = 0;
+                        do
+                        {
+                            subTotalCompra[vIndiceCompra] = valorProduto[relacaoProduto[vIndiceCompra]];
+                            printf("Valor do produto: %0.2lf\n", subTotalCompra[vIndiceCompra]);
+                            printf("Produto com desconto (S/n)? ");
+                            strlwr(gets(promptSimNao));
+                            fflush(stdin);
+                            if (strcmp(promptSimNao, promptCompare[0]) == 0)
+                            {
+                                printf("Insira a porcentagem de desconto: ");
+                                scanf("%lf", &prcntDescontoCompra[vIndiceCompra]);
+                                prcntDescontoCompra[vIndiceCompra] = prcntDescontoCompra[vIndiceCompra] / 100;
+                                prcntDescontoCompra[vIndiceCompra] = subTotalCompra[vIndiceCompra] - (subTotalCompra[vIndiceCompra] * prcntDescontoCompra[vIndiceCompra]);
+                                valorTotalVenda[vIndiceCompra] = prcntDescontoCompra[vIndiceCompra];
+                            }
+                            else
+                            {
+                                valorTotalVenda[vIndiceCompra] = subTotalCompra[vIndiceCompra];
+                            }
+                            qtComprasARealizar[vIndiceCompra] = 1;
+                            printf("Qual a quantia do produto a serem vendidos (pelo menos 1)? ");
+                            scanf("%d", &qtComprasARealizar[vIndiceCompra]);
+                            fflush(stdin);
+                            while (qtComprasARealizar[vIndiceCompra] <= 0)
+                            {
+                                printf("A quantia minima para a venda eh 1\n");
+                                printf("Por favor insira a quantidade do produto a ser vendida: ");
+                                scanf("%d", &qtComprasARealizar[vIndiceCompra]);
+                                fflush(stdin);
+                            }
 
-                    vIndiceCompra++;
-                    contadorPadrao++;
+                            fflush(stdin);
+                            valorTotalVenda[vIndiceCompra] = valorTotalVenda[vIndiceCompra] * qtComprasARealizar[vIndiceCompra];
+
+                            printf("Serao vendidos: %d %s da marca %s", qtComprasARealizar[vIndiceCompra], nomeProduto[relacaoProduto[vIndiceCompra]], marcaProduto[relacaoProduto[vIndiceCompra]]);
+                            printf("\nPara o cliente: %s", nomeCliente[relacaoCliente[vIndiceCompra]]);
+                            printf("\nCom o valor final da compra de: %0.2lf", valorTotalVenda[vIndiceCompra]);
+                            printf("\nFinalizar venda (S/n)?");
+                            strlwr(gets(promptSimNao));
+                            fflush(stdin);
+                            if (strcmp(promptSimNao, promptCompare[0]) == 0)
+                            {
+                                ableToProceed = 1;
+                            }
+                            else
+                            {
+                                printf("Revisando pedido");
+                                ableToProceed = 0;
+                            }
+                        } while (ableToProceed < 1);
+
+                        printf("Compra realizada com sucesso!");
+                    }
                 }
             }
             break;
@@ -301,6 +392,10 @@ int main()
 // Função de cadastro de clientes
 void cadastroCliente(int *cdClient, char *nomeCliente[50], double *cpfCliente, char *sexoCliente[50], double *telefoneCliente, char *emailCliente[50], int *comprasRealizadas, int *vIndiceCliente)
 {
+    int ValidacaoDeEtapa = 0;
+    char confirmEmailArroba[250] = {"@"};
+    char confirmEmailPontoCom[250] = {".com"};
+
     // Recebemos os principais dados dos clientes
     printf("\n###########");
     printf("\nIniciando cadastro!");
@@ -312,18 +407,57 @@ void cadastroCliente(int *cdClient, char *nomeCliente[50], double *cpfCliente, c
     scanf("%lf", cpfCliente);
     fflush(stdin);
 
-    printf("Insira o sexo do cliente (F/M): ");
-    gets(sexoCliente);
-    fflush(stdin);
+    do
+    {
+        printf("Insira o sexo do cliente (F/M): ");
+        gets(sexoCliente);
+        fflush(stdin);
+
+        if (strlen(sexoCliente) > 1)
+        {
+            printf("\nO sexo inserido nao eh valido\n\n");
+            ValidacaoDeEtapa = 0;
+        }
+        else
+        {
+            ValidacaoDeEtapa = 1;
+        }
+
+    } while (ValidacaoDeEtapa < 1);
+
+    ValidacaoDeEtapa = 0;
 
     printf("Insira o telefone do cliente: ");
     scanf("%lf", telefoneCliente);
     fflush(stdin);
 
-    printf("Insira o email do cliente: ");
-    gets(emailCliente);
-    fflush(stdin);
+    do
+    {
+        printf("Insira o email do cliente: ");
+        gets(emailCliente);
+        fflush(stdin);
 
+        if (strstr(emailCliente, confirmEmailArroba) == NULL && strstr(emailCliente, confirmEmailPontoCom) == NULL)
+        {
+            printf("\nO email inserido nao eh valido\n\n");
+            ValidacaoDeEtapa = 0;
+        }
+        else if (strstr(emailCliente, confirmEmailArroba) != NULL && strstr(emailCliente, confirmEmailPontoCom) == NULL)
+        {
+            printf("\nO email inserido nao eh valido\n\n");
+            ValidacaoDeEtapa = 0;
+        }
+        else if (strstr(emailCliente, confirmEmailArroba) == NULL && strstr(emailCliente, confirmEmailPontoCom) != NULL)
+        {
+            printf("\nO email inserido nao eh valido\n\n");
+            ValidacaoDeEtapa = 0;
+        }
+        else
+        {
+            ValidacaoDeEtapa = 1;
+        }
+
+    } while (ValidacaoDeEtapa < 1);
     printf("\n\n##########\n");
     printf("# Cliente cadastrado com sucesso !!!\n");
     printf("# Codigo de cadastro: %d\n", cdClient);
@@ -338,6 +472,8 @@ void cadastroCliente(int *cdClient, char *nomeCliente[50], double *cpfCliente, c
 //Função de cadastro de produtos
 void cadastroProduto(int *cdProduto, char *nomeProduto[50], char *marcaProduto[50], char *modeloProduto[50], double *valorProduto, int *vIndiceProduto)
 {
+    int ValidacaoDeEtapa = 0;
+
     // Recebendo dados do Produto
     printf("\n###########");
     printf("\nIniciando cadastro de Produto!");
@@ -353,9 +489,23 @@ void cadastroProduto(int *cdProduto, char *nomeProduto[50], char *marcaProduto[5
     gets(modeloProduto);
     fflush(stdin);
 
-    printf("Insira o valor do Produto: ");
-    scanf("%lf", valorProduto);
-    fflush(stdin);
+    do
+    {
+        printf("\nInsira o valor do Produto: ");
+        scanf("%lf", valorProduto);
+        fflush(stdin);        
+
+        if (*valorProduto <= 0)
+        {
+            printf("\nO valor inserido deve ser maior do que 0!\n\n");
+            ValidacaoDeEtapa = 0;
+        }
+        else
+        {
+            ValidacaoDeEtapa = 1;
+        }
+
+    } while (ValidacaoDeEtapa < 1);
 
     printf("\n\n##########\n");
     printf("# Produto cadastrado com sucesso !!!\n");
@@ -367,34 +517,3 @@ void cadastroProduto(int *cdProduto, char *nomeProduto[50], char *marcaProduto[5
     printf("##########\n\n");
 }
 
-// Função de realizalção de venda
-void realizarCompra(int *cdCompra, double *relacaoCpfCliente, int *relacaoProduto, int *qtVenda, int *subTotalCompra, double *prcntDescontoCompra, double *valorTotalVenda, char *promptSimNao, char *promptCompare)
-{
-    // Recebendo dados da Compra
-    printf("\n###########");
-    printf("Iniciando compra");
-    printf("\n Insira o CPF do cliente: ");
-    scanf(relacaoCpfCliente);
-    fflush(stdin);
-
-    printf("\n Insira o codigo do Produto: ");
-    scanf(relacaoProduto);
-    fflush(stdin);   
-
-    printf("\n Insira a quantidade do Prduto: ");
-    scanf(qtVenda);
-    fflush(stdin); 
-
-
-    printf("\n\n##########\n");
-    printf("# Venda Executada com sucesso!\n");
-    printf("# Codigo da venda: %d\n", cdCompra);
-    printf("# Identificação do Cliente: %d\n", relacaoCpfCliente);
-    printf("# Código do Produto Vendido: %d\n", relacaoProduto);
-    printf("# Quantidade do Produto %d: %d\n", relacaoProduto, qtVenda);
-    printf("# Total da Compra: %0.02lf \n", subTotalCompra);
-    printf("# Desconto: %0.0lf\n", prcntDescontoCompra);
-    printf("# Valor à pagar: %0.02lf\n", valorTotalVenda);
-    printf("##########\n\n");
-
-}
