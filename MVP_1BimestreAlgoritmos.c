@@ -394,9 +394,8 @@ int main()
                                 ableToProceed = 0;
                             }
                         } while (ableToProceed < 1);
-                        vIndiceCompra++;
                         comprasRealizadas[relacaoCliente[vIndiceCompra]]++;
-
+                        vIndiceCompra++;
                         printf("Compra realizada com sucesso!");
                     }
                 }
