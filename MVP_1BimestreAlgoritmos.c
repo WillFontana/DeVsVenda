@@ -46,6 +46,7 @@ int main()
     printf("Bem vindo ao MVP do Sr. Oswaldo!\n");
     do
     {
+        // Menu de escolha do sistema
         printf("\n############# Menu de controle ##############\n");
         printf("#############################################\n\n");
         printf("       --- { O que deseja fazer? }---\n\n");
@@ -92,7 +93,7 @@ int main()
                 }
             }
             else
-            {
+            {    // Se ha registro de cadastro de produtos
                 for (int i = 1; i < vIndiceProduto; i++)
                 {
                     printf("\n\n##########\n");
@@ -116,6 +117,7 @@ int main()
                 strlwr(gets(promptSimNao));
                 fflush(stdin);
                 // Iniciamos o cadastro de clientes
+                // Se o usuario escolhe cadastrar um cliente
                 if (strcmp(promptSimNao, promptCompare[0]) == 0)
                 {
 
@@ -123,18 +125,21 @@ int main()
                     {
                         cdCliente[vIndiceCliente] = vIndiceCliente;
                         comprasRealizadas[vIndiceCliente] = 0;
+                        // Função para cadastro dos clientes
                         cadastroCliente(cdCliente[vIndiceCliente], nomeCliente[vIndiceCliente], &cpfCliente[vIndiceCliente], sexoCliente[vIndiceCliente], &telefoneCliente[vIndiceCliente], emailCliente[vIndiceCliente], comprasRealizadas[vIndiceCliente], vIndiceCliente);
                         vIndiceCliente++;
+                        // Após cadastro perguntar se o usuaro deseja cadastrar um novo cliente
                         printf("Cadastrar um novo cliente(S/n)? ");
                         strlwr(gets(promptSimNao));
                         fflush(stdin);
+                        // Se a resposta for sim, ele irá repetir o "do"
                     } while (strcmp(promptSimNao, promptCompare[0]) == 0);
                 }
             }
             else
-            {
+            { //Se ha registro de cadastro de clientes:
                 for (int i = 1; i < vIndiceCliente; i++)
-                {
+                { 
                     printf("\n\n##########\n");
                     printf("#\n");
                     printf("# Codigo de cadastro: %d\n", cdCliente[i]);
@@ -148,8 +153,6 @@ int main()
                 }
             }
             break;
-            //  -------------
-
             // Cases de cadastro -------------
             // Iniciar o cadastro de produtos
         case 3:
@@ -161,7 +164,7 @@ int main()
                 cadastroProduto(cdProduto[vIndiceProduto], nomeProduto[vIndiceProduto], marcaProduto[vIndiceProduto], modeloProduto[vIndiceProduto], &valorProduto[vIndiceProduto], vIndiceProduto);
                 // Aumentamos a quantidade de produtos no sistema
                 vIndiceProduto++;
-                // Por fim verificamos se o cliente quer cadastrar outro produto
+                // Por fim verificamos se o usuário quer cadastrar outro produto
                 printf("Cadastrar um novo Produto(S/n)? ");
                 strlwr(gets(promptSimNao));
                 fflush(stdin);
@@ -171,19 +174,25 @@ int main()
         case 4:
             do
             {
+                //Setamos o codigo do cliente
                 cdCliente[vIndiceCliente] = vIndiceCliente;
+                //Setamos um registro de compra para o cliente
                 comprasRealizadas[vIndiceCliente] = 0;
+                // Chamamos a função de cadastro de cliente
                 cadastroCliente(cdCliente[vIndiceCliente], nomeCliente[vIndiceCliente], &cpfCliente[vIndiceCliente], sexoCliente[vIndiceCliente], &telefoneCliente[vIndiceCliente], emailCliente[vIndiceCliente], comprasRealizadas[vIndiceCliente], vIndiceCliente);
+                // Aumentamos a quantidade de clientes no sistema
                 vIndiceCliente++;
+                // Verificar se o usuário quer cadastrar outro cliente
                 printf("Cadastrar um novo cliente(S/n)? ");
                 strlwr(gets(promptSimNao));
                 fflush(stdin);
             } while (strcmp(promptSimNao, promptCompare[0]) == 0);
             break;
+            // Iniciar o cadastro de vendas
         case 5:
             if (vIndiceCliente == 1)
             {
-                // Caso não existam produtos verificamos se o cliente quer cadastrar algum
+                // Caso não existam produtos verificamos se o usuario quer cadastrar algum
                 printf("\n\nNao eh possivel realizar uma venda pois nao existem clientes cadastrados\n");
                 printf("Cadastrar um Cliente agora (S/n)? ");
                 strlwr(gets(promptSimNao));
@@ -193,10 +202,15 @@ int main()
                 {
                     do
                     {
+                        //Setamos o codigo do cliente
                         cdCliente[vIndiceCliente] = vIndiceCliente;
+                        //Setamos um registro de compra para o cliente
                         comprasRealizadas[vIndiceCliente] = 0;
+                        // Chamamos a função de cadastro de cliente
                         cadastroCliente(cdCliente[vIndiceCliente], nomeCliente[vIndiceCliente], &cpfCliente[vIndiceCliente], sexoCliente[vIndiceCliente], &telefoneCliente[vIndiceCliente], emailCliente[vIndiceCliente], comprasRealizadas[vIndiceCliente], vIndiceCliente);
+                        // Aumentamos a quantidade de clientes no sistema
                         vIndiceCliente++;
+                        // Verificar se o usuário quer cadastrar outro cliente
                         printf("Cadastrar um novo cliente(S/n)? ");
                         strlwr(gets(promptSimNao));
                         fflush(stdin);
@@ -205,6 +219,7 @@ int main()
             }
             else if (vIndiceProduto == 1)
             {
+                // Caso não exista produtos verificamos se o usuário deseja cadastrar um Produto
                 printf("\n\nNao eh possivel realizar uma venda pois nao existem produtos cadastrados\n");
                 printf("Cadastrar um Produto agora (S/n)? ");
                 strlwr(gets(promptSimNao));
@@ -229,7 +244,9 @@ int main()
             }
             else
             {
+                //Setamos um registro de compra para o cliente
                 cdCompra[vIndiceCompra] = vIndiceCompra;
+                //Chamamos o codigo do produto que deseja registrar venda
                 printf("Por favor insira o codigo de cadastro do produto: ");
                 scanf("%d", &relacaoProduto[vIndiceCompra]);
                 fflush(stdin);
@@ -237,7 +254,7 @@ int main()
                 while (contadorPadrao < vIndiceProduto)
                 {
                     if (relacaoProduto[vIndiceCompra] == cdProduto[contadorPadrao])
-                    {
+                    {   
                         printf("Produto encontrado: %s\n", nomeProduto[contadorPadrao]);
                         ableToProceed = 1;
                         contadorPadrao = vIndiceProduto + 1;
@@ -251,6 +268,7 @@ int main()
                 if (ableToProceed < 1)
                 {
                     printf("Nao foram encontrados produtos com o codigo inserido!\n");
+                    // Chamamos para o usuario escolher se deseja listar os produtos a fim de encontrar um codigo valido
                     printf("Deseja listar todos os produtos cadastrados (S/n)? \n");
                     strlwr(gets(promptSimNao));
                     fflush(stdin);
@@ -276,6 +294,7 @@ int main()
                 }
                 else
                 {
+                    //Chamamos por um código de cliente 
                     printf("Agora por favor informe o codigo do cadastro do cliente: ");
                     scanf("%d", &relacaoCliente[vIndiceCompra]);
                     fflush(stdin);
@@ -375,6 +394,8 @@ int main()
                                 ableToProceed = 0;
                             }
                         } while (ableToProceed < 1);
+                        vIndiceCompra++;
+                        comprasRealizadas[relacaoCliente[vIndiceCompra]]++;
 
                         printf("Compra realizada com sucesso!");
                     }
@@ -407,7 +428,7 @@ void cadastroCliente(int *cdClient, char *nomeCliente[50], double *cpfCliente, c
     scanf("%lf", cpfCliente);
     fflush(stdin);
 
-    do
+    do // Validacao do sexo do cliente cadastrado
     {
         printf("Insira o sexo do cliente (F/M): ");
         gets(sexoCliente);
@@ -431,33 +452,39 @@ void cadastroCliente(int *cdClient, char *nomeCliente[50], double *cpfCliente, c
     scanf("%lf", telefoneCliente);
     fflush(stdin);
 
-    do
+    do // Validacao do email do cliente cadastrado
     {
         printf("Insira o email do cliente: ");
         gets(emailCliente);
         fflush(stdin);
-
+        
+        // Se o @ e o .com não existir invalida o email
         if (strstr(emailCliente, confirmEmailArroba) == NULL && strstr(emailCliente, confirmEmailPontoCom) == NULL)
         {
             printf("\nO email inserido nao eh valido\n\n");
             ValidacaoDeEtapa = 0;
         }
+        // Se o @ existir e o .com não existir invalida o email
         else if (strstr(emailCliente, confirmEmailArroba) != NULL && strstr(emailCliente, confirmEmailPontoCom) == NULL)
         {
             printf("\nO email inserido nao eh valido\n\n");
             ValidacaoDeEtapa = 0;
         }
+        // Se o @ não existir e o .com existir invalida o email
         else if (strstr(emailCliente, confirmEmailArroba) == NULL && strstr(emailCliente, confirmEmailPontoCom) != NULL)
         {
             printf("\nO email inserido nao eh valido\n\n");
             ValidacaoDeEtapa = 0;
         }
+        // Se houver @ e .com o email é valido
         else
         {
             ValidacaoDeEtapa = 1;
         }
 
     } while (ValidacaoDeEtapa < 1);
+    
+    // Imprimindo os dados do cliente cadastrado
     printf("\n\n##########\n");
     printf("# Cliente cadastrado com sucesso !!!\n");
     printf("# Codigo de cadastro: %d\n", cdClient);
@@ -490,16 +517,18 @@ void cadastroProduto(int *cdProduto, char *nomeProduto[50], char *marcaProduto[5
     fflush(stdin);
 
     do
-    {
+    { // Validação do valor do produto
         printf("\nInsira o valor do Produto: ");
         scanf("%lf", valorProduto);
         fflush(stdin);        
 
+        // condição para se o usuário insere um valor menor ou igual que 0
         if (*valorProduto <= 0)
         {
             printf("\nO valor inserido deve ser maior do que 0!\n\n");
             ValidacaoDeEtapa = 0;
         }
+        // condição para se o usuario insere um valor maior ou igual a 1
         else
         {
             ValidacaoDeEtapa = 1;
@@ -507,6 +536,7 @@ void cadastroProduto(int *cdProduto, char *nomeProduto[50], char *marcaProduto[5
 
     } while (ValidacaoDeEtapa < 1);
 
+    // imprimindo os dados do produto cadastrado
     printf("\n\n##########\n");
     printf("# Produto cadastrado com sucesso !!!\n");
     printf("# Codigo de cadastro do Produto: %d\n", cdProduto);
