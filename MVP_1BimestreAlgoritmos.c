@@ -313,12 +313,15 @@ int main()
                             contadorPadrao++;
                         }
                     }
+                    // Condição para o caso do usuário digitar um codigo inexistente
                     if (ableToProceed < 1)
                     {
+                        //Usuário escolhe se deseja listar os clientes cadastrados
                         printf("Nao foram encontrados clientes com o codigo inserido!\n");
                         printf("Deseja listar todos os produtos cadastrados (S/n)? \n");
                         strlwr(gets(promptSimNao));
                         fflush(stdin);
+                        // Se o usuario deseja listar:
                         if (strcmp(promptSimNao, promptCompare[0]) == 0)
                         {
                             /* Listando todos os clientes */
@@ -336,21 +339,26 @@ int main()
                                 printf("##########\n\n");
                             }
                         }
+                        // Se o usuario não quiser listar os produtos
                         else
                         {
                             printf("Retornando ao menu inicial!\n");
                         }
                     }
+                    // Condição para o usuario realizar a venda:
                     else
                     {
                         ableToProceed = 0;
                         do
                         {
+                            // Agregar informações a partir do produto selecionado
                             subTotalCompra[vIndiceCompra] = valorProduto[relacaoProduto[vIndiceCompra]];
                             printf("Valor do produto: %0.2lf\n", subTotalCompra[vIndiceCompra]);
+                            // Perguntar ao usuario se o produto tem desconto
                             printf("Produto com desconto (S/n)? ");
                             strlwr(gets(promptSimNao));
                             fflush(stdin);
+                            // Pedir ao usuário a porcentagem de desconto do produto                            
                             if (strcmp(promptSimNao, promptCompare[0]) == 0)
                             {
                                 printf("Insira a porcentagem de desconto: ");
@@ -359,14 +367,17 @@ int main()
                                 prcntDescontoCompra[vIndiceCompra] = subTotalCompra[vIndiceCompra] - (subTotalCompra[vIndiceCompra] * prcntDescontoCompra[vIndiceCompra]);
                                 valorTotalVenda[vIndiceCompra] = prcntDescontoCompra[vIndiceCompra];
                             }
+                            // Definir o valor total a partir do subtotal
                             else
                             {
                                 valorTotalVenda[vIndiceCompra] = subTotalCompra[vIndiceCompra];
                             }
+                            // Pedir ao usuário a quantidade de produtos 
                             qtComprasARealizar[vIndiceCompra] = 1;
                             printf("Qual a quantia do produto a serem vendidos (pelo menos 1)? ");
                             scanf("%d", &qtComprasARealizar[vIndiceCompra]);
                             fflush(stdin);
+                            // Se o usuário digitar um valor menor ou igual a 0
                             while (qtComprasARealizar[vIndiceCompra] <= 0)
                             {
                                 printf("A quantia minima para a venda eh 1\n");
@@ -374,20 +385,23 @@ int main()
                                 scanf("%d", &qtComprasARealizar[vIndiceCompra]);
                                 fflush(stdin);
                             }
-
+                            // Calcular o valor total em relação a quantidade de produtos vendidos
                             fflush(stdin);
                             valorTotalVenda[vIndiceCompra] = valorTotalVenda[vIndiceCompra] * qtComprasARealizar[vIndiceCompra];
-
+                            // Imprimir dados da Venda
                             printf("Serao vendidos: %d %s da marca %s", qtComprasARealizar[vIndiceCompra], nomeProduto[relacaoProduto[vIndiceCompra]], marcaProduto[relacaoProduto[vIndiceCompra]]);
                             printf("\nPara o cliente: %s", nomeCliente[relacaoCliente[vIndiceCompra]]);
                             printf("\nCom o valor final da compra de: %0.2lf", valorTotalVenda[vIndiceCompra]);
+                            // Finalizar venda
                             printf("\nFinalizar venda (S/n)?");
                             strlwr(gets(promptSimNao));
                             fflush(stdin);
+                            // Se sim
                             if (strcmp(promptSimNao, promptCompare[0]) == 0)
                             {
                                 ableToProceed = 1;
                             }
+                            // Se não
                             else
                             {
                                 printf("Revisando pedido");
