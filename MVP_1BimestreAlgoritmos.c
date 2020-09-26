@@ -408,9 +408,8 @@ int main()
                                 ableToProceed = 0;
                             }
                         } while (ableToProceed < 1);
-                        vIndiceCompra++;
                         comprasRealizadas[relacaoCliente[vIndiceCompra]]++;
-
+                        vIndiceCompra++;
                         printf("Compra realizada com sucesso!");
                     }
                 }
@@ -560,4 +559,3 @@ void cadastroProduto(int *cdProduto, char *nomeProduto[50], char *marcaProduto[5
     printf("# Valor cadastrado: %0.0lf\n", *valorProduto);
     printf("##########\n\n");
 }
-
