@@ -545,4 +545,3 @@ void cadastroProduto(int *cdProduto, char *nomeProduto[50], char *marcaProduto[5
     printf("# Valor cadastrado: %0.0lf\n", *valorProduto);
     printf("##########\n\n");
 }
-
