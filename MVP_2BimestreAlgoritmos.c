@@ -12,8 +12,8 @@
 // Definimos a estrutura dos clientes
 struct contato
 {
-  char telefone[12], // Telefone fixo do cliente
-      celular[13]    // Celular do cliente
+  char telefone[15], // Telefone fixo do cliente
+      celular[16]    // Celular do cliente
 };
 struct cliente
 {
@@ -29,19 +29,19 @@ typedef struct cliente client;
 // -----------------------------------
 
 // Definimos a estrutura dos produtos
+struct modelo
+{
+  char marcaproduto[20], //marca do produto
+      modeloproduto[20]; //modelo do produto
+};
 struct produto
 {
-      int cdProduto; //codigo do produto
-      char nomeProduto[50],//nome do produto
-           double valorProduto;// valor do produto
-           struct modelo tel;
-  };
-struct modelo
-    {
-        char marcaproduto[]50,//marca do produto
-             modeloproduto[50];//modelo do produto
-    };
-
+  int cdProduto;        //codigo do produto
+  char nomeProduto[50]; //nome do produto
+  double valorProduto;  // valor do produto
+  struct modelo model;  // variações do produto
+};
+typedef struct produto product;
 // -----------------------------------
 
 // Definimos a estrutura das compras
@@ -56,6 +56,7 @@ struct compra
       prcntDescontoCompra, // Porcentagem do desconto
       valorTotalVenda;     // Valor final da venda
 };
+typedef struct compra purchase;
 
 // Interações do cliente
 void cadastraCliente(struct cliente *cliente, int contador), // Cadastro de cliente
@@ -91,18 +92,26 @@ void main()
 {
   printf("---{ Iniciando o sistema! }---\n");
   // Declaração das variáveis de controle gerais
-  char promptSimNao[2]; // Resposta do usuário (Qualquer caractere diferente de s é considerado não pelo sistema);
-  int filaCliente = 1,  // Contador de clientes
-      filaProdutos = 1, // Contador de produtos
-      escolhaMenu;      // Escolha do menu
-  client *clientes;
-  clientes = (client *)malloc(filaCliente * sizeof(client));
+  char promptSimNao[2];                                      // Resposta do usuário (Qualquer caractere diferente de s é considerado não pelo sistema);
+  int filaCliente = 1,                                       // Contador de clientes
+      filaProdutos = 1,                                      // Contador de produtos
+      escolhaMenu;                                           // Escolha do menu
+  client *clientes;                                          // Definimos nossa tabela de clientes
+  clientes = (client *)malloc(filaCliente * sizeof(client)); // Alocamos espaço para o cliente
   if (clientes == NULL)
   {
     printf("Erro ao alocar espaco para os clientes");
   }
 
+  product *produtos;
+  produtos = (product *)malloc(filaProdutos * sizeof(product)); // Alocamos espaço para o produto
+  if (produtos == NULL)
+  {
+    printf("Erro ao alocar espaco para os produtos");
+  }
+
   printf("Bem vindo ao MVP do Sr. Oswaldo!\n");
+
   do
   {
     // Menu de escolha do sistema
@@ -129,10 +138,19 @@ void main()
         printf("Cadastrar um Produto agora (S/n)? ");
         fflush(stdin);
         strlwr(gets(promptSimNao));
+        fflush(stdin);
         if (promptCompare(promptSimNao) == 1)
         {
-          // Realiza cadastro de produtos
-          printf("\nO usuario disse sim");
+          do
+          {
+            RealocaTamanhoStruct(produtos, filaProdutos);
+            cadastraProdutos(&produtos[filaProdutos], filaProdutos);
+            filaProdutos++;
+            printf("Cadastrar um novo produto(S/n)? ");
+            fflush(stdin);
+            strlwr(gets(promptSimNao));
+            fflush(stdin);
+          } while (promptCompare(promptSimNao) == 1);
         }
         else
         {
@@ -149,6 +167,10 @@ void main()
       }
       else
       {
+        for (size_t i = 1; i < filaProdutos; i++)
+        {
+          listarProdutos(&produtos[i]);
+        }
       }
       break;
     case 2: // Listagem de clientes
@@ -158,6 +180,7 @@ void main()
         printf("Cadastrar um cliente agora (S/n)? ");
         fflush(stdin);
         strlwr(gets(promptSimNao));
+        fflush(stdin);
         if (promptCompare(promptSimNao) == 1)
         {
           do
@@ -168,6 +191,7 @@ void main()
             printf("Cadastrar um novo cliente(S/n)? ");
             fflush(stdin);
             strlwr(gets(promptSimNao));
+            fflush(stdin);
           } while (promptCompare(promptSimNao) == 1);
         }
         else
@@ -191,6 +215,17 @@ void main()
         }
       }
       break;
+    case 5: // Cadastro direto de produtos
+      do
+      {
+        RealocaTamanhoStruct(produtos, filaProdutos);
+        cadastraProdutos(&produtos[filaProdutos], filaProdutos);
+        filaProdutos++;
+        printf("Cadastrar um novo produto(S/n)? ");
+        fflush(stdin);
+        strlwr(gets(promptSimNao));
+        fflush(stdin);
+      } while (promptCompare(promptSimNao) == 1); 
     case 6: // Cadastro direto de cliente
       do
       {
@@ -200,6 +235,7 @@ void main()
         printf("Cadastrar um novo cliente(S/n)? ");
         fflush(stdin);
         strlwr(gets(promptSimNao));
+        fflush(stdin);
       } while (promptCompare(promptSimNao) == 1);
     default:
       break;
@@ -207,8 +243,10 @@ void main()
   } while (escolhaMenu != 8);
 }
 
+// Manipulação de clientes
 void cadastraCliente(struct cliente *cliente, int contador)
 {
+  // Código do cliente
   cliente->cdCliente = contador;
   // Nome do cliente:
   printf("\nInsira o nome do cliente: ");
@@ -239,11 +277,10 @@ void cadastraCliente(struct cliente *cliente, int contador)
   printf("\n\nDados do cadastro!\n\n");
   listarClientes(cliente);
 }
-
 void listarClientes(struct cliente *cliente)
 {
   // Codigo do cliente:
-  printf("#########################");
+  printf("\n\n#########################");
   printf("\n# Codigo do cadastro do cliente: %d", cliente->cdCliente);
   // Nome do cliente:
   printf("\n\n# Nome do cliente: %s", cliente->nomeCliente);
@@ -257,37 +294,48 @@ void listarClientes(struct cliente *cliente)
   printf("\n\n# Celular do cliente: %s", cliente->tel.celular);
   // Sexo do cliente:
   printf("\n\n# Sexo do cliente (F/M): %s", cliente->sexoCliente);
-  printf("\n\n#########################\n\n");
+  printf("\n#########################\n\n");
 }
 
-void cadastraProdutos(struct produto*produto),int contador)
-         {
-             produto = (struct produto*)malloc(sizeof(struct produto));
-              produto => cdproduto = contador;
-                  //codigo do produto
-                  printf("\n adicione o codigo do produto");
-                   fflush(stdin);
-                  scanf("%lf",&produto=>cdproduto);
-
-                   printf("\n adicione o nome do produto");
-                   fflush(stdin)
-                   gets(produto=>nomeproduto);
-
-                   printf("\n adicione o valor do produto");
-                   fflush(stdin)
-                    scanf("%0.5lf",&produto=>valorproduto;
-                   fflush(stdin)
-                   printf("\n adicione a marca do produto");
-                     gets(produto=>marcaproduto);
-                     fflush(stdin)
-                   printf("\n adicione o modelo do produto");
-                    gets(produto=>modeloproduto);
-                    printf"\n o seu produto foi cadastrado com sucesso!!!\n");
-
-
-         }
-
-
-
-
-
+// Manipulação de produtos
+void cadastraProdutos(struct produto *produto, int contador)
+{
+  // Código do produto
+  produto->cdProduto = contador;
+  // Nome do produto
+  printf("\nInsira o nome do produto: ");
+  fflush(stdin);
+  gets(produto->nomeProduto);
+  // Valor do produto
+  printf("\nInsira o valor do produto R$: ");
+  fflush(stdin);
+  scanf("%lf", &produto->valorProduto);
+  // Marca do produto
+  printf("\nInsira a marca do produto: ");
+  fflush(stdin);
+  gets(produto->model.marcaproduto);
+  // Modelo do produto
+  printf("\nInsira o modelo do produto: ");
+  fflush(stdin);
+  gets(produto->model.modeloproduto);
+  // Finalização do cadastro de produtos
+  printf("\nO seu produto foi cadastrado com sucesso!!!\n");
+  printf("\n\nDados do cadastro!\n\n");
+  fflush(stdin);
+  listarProdutos(produto);
+}
+void listarProdutos(struct produto *produto)
+{
+  // Codigo do produto:
+  printf("\n\n#########################");
+  printf("\n# Codigo do cadastro do produto: %d", produto->cdProduto);
+  // Nome do produto:
+  printf("\n\n# Nome do produto: %s", produto->nomeProduto);
+  // CPF do produto:
+  printf("\n\n# Modelo do produto: %s", produto->model.modeloproduto);
+  // Email do produto:
+  printf("\n\n# Marca do produto: %s", produto->model.marcaproduto);
+  // Telefone do produto
+  printf("\n\n# Valor do produto R$: %0.2lf", produto->valorProduto);
+  printf("\n#########################\n\n");
+}

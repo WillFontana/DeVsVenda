@@ -1,16 +1,16 @@
 ** Structs:
-Montar a struct do cliente;
-Montar a struct do produto;
+Montar a struct do cliente - OK;
+Montar a struct do produto - OK;
 Montar a struct da venda;
 * Sub Structs
-  Montar a struct de contato;
-  Montar a struct de modelos;
+  Montar a struct de contato - OK;
+  Montar a struct de modelos - OK;
 
 
 ** Funções:
 // - Cadastro
-Montar a função de cadastro de produtos;
-Montar a função de cadastro de clientes;
+Montar a função de cadastro de produtos - OK;
+Montar a função de cadastro de clientes - OK;
 // - Importação
 Montar a função de importação de produtos;
 Montar a função de importação de clientes;
@@ -18,13 +18,14 @@ Montar a função de importação de clientes;
 Montar a função de exportação de produtos;
 Montar a função de exportação de clientes;
 // - Listagem
-Montar a função de listagem de produtos;
-Montar a função de listagem de clientes;
+Montar a função de listagem de produtos - OK;
+Montar a função de listagem de clientes - OK;
 // - Venda
 Montar a função de venda (Carrinho);
 
 ** Funcionalidades:
 // - Controle do usuario;
-Função que retorna a escolha do usuario (s/n);
+Função que retorna a escolha do usuario (s/n) - OK;
+Alocação dinâmica genérica entre structs  - OK;
 Função que valida o email;
 Função que valida o sexo;
