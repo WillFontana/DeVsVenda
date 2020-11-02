@@ -143,9 +143,9 @@ void main()
         {
           do
           {
-            RealocaTamanhoStruct(produtos, filaProdutos);
             cadastraProdutos(&produtos[filaProdutos], filaProdutos);
             filaProdutos++;
+            RealocaTamanhoStruct(produtos, filaProdutos);
             printf("Cadastrar um novo produto(S/n)? ");
             fflush(stdin);
             strlwr(gets(promptSimNao));
@@ -185,9 +185,9 @@ void main()
         {
           do
           {
-            RealocaTamanhoStruct(clientes, filaCliente);
             cadastraCliente(&clientes[filaCliente], filaCliente);
             filaCliente++;
+            RealocaTamanhoStruct(clientes, filaCliente);
             printf("Cadastrar um novo cliente(S/n)? ");
             fflush(stdin);
             strlwr(gets(promptSimNao));
@@ -218,20 +218,21 @@ void main()
     case 5: // Cadastro direto de produtos
       do
       {
-        RealocaTamanhoStruct(produtos, filaProdutos);
         cadastraProdutos(&produtos[filaProdutos], filaProdutos);
         filaProdutos++;
+        RealocaTamanhoStruct(produtos, filaProdutos);
         printf("Cadastrar um novo produto(S/n)? ");
         fflush(stdin);
         strlwr(gets(promptSimNao));
         fflush(stdin);
-      } while (promptCompare(promptSimNao) == 1); 
+      } while (promptCompare(promptSimNao) == 1);
+      break;
     case 6: // Cadastro direto de cliente
       do
       {
-        RealocaTamanhoStruct(clientes, filaCliente);
         cadastraCliente(&clientes[filaCliente], filaCliente);
         filaCliente++;
+        RealocaTamanhoStruct(clientes, filaCliente);
         printf("Cadastrar um novo cliente(S/n)? ");
         fflush(stdin);
         strlwr(gets(promptSimNao));
