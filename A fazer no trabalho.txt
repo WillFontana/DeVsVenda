@@ -1,0 +1,30 @@
+** Structs:
+Montar a struct do cliente;
+Montar a struct do produto;
+Montar a struct da venda;
+* Sub Structs
+  Montar a struct de contato;
+  Montar a struct de modelos;
+
+
+** Funções:
+// - Cadastro
+Montar a função de cadastro de produtos;
+Montar a função de cadastro de clientes;
+// - Importação
+Montar a função de importação de produtos;
+Montar a função de importação de clientes;
+// - Exportação
+Montar a função de exportação de produtos;
+Montar a função de exportação de clientes;
+// - Listagem
+Montar a função de listagem de produtos;
+Montar a função de listagem de clientes;
+// - Venda
+Montar a função de venda (Carrinho);
+
+** Funcionalidades:
+// - Controle do usuario;
+Função que retorna a escolha do usuario (s/n);
+Função que valida o email;
+Função que valida o sexo;
