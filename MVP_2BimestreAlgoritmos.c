@@ -31,7 +31,17 @@ typedef struct cliente client;
 // Definimos a estrutura dos produtos
 struct produto
 {
-};
+      int cdProduto; //codigo do produto
+      char nomeProduto[50],//nome do produto
+           double valorProduto;// valor do produto
+           struct modelo tel;
+  };
+struct modelo
+    {
+        char marcaproduto[]50,//marca do produto
+             modeloproduto[50];//modelo do produto
+    };
+
 // -----------------------------------
 
 // Definimos a estrutura das compras
@@ -153,7 +163,7 @@ void main()
           do
           {
             RealocaTamanhoStruct(clientes, filaCliente);
-            cadastraCliente(&clientes[filaCliente], filaCliente);            
+            cadastraCliente(&clientes[filaCliente], filaCliente);
             filaCliente++;
             printf("Cadastrar um novo cliente(S/n)? ");
             fflush(stdin);
@@ -198,7 +208,7 @@ void main()
 }
 
 void cadastraCliente(struct cliente *cliente, int contador)
-{  
+{
   cliente->cdCliente = contador;
   // Nome do cliente:
   printf("\nInsira o nome do cliente: ");
@@ -231,7 +241,7 @@ void cadastraCliente(struct cliente *cliente, int contador)
 }
 
 void listarClientes(struct cliente *cliente)
-{  
+{
   // Codigo do cliente:
   printf("#########################");
   printf("\n# Codigo do cadastro do cliente: %d", cliente->cdCliente);
@@ -249,3 +259,35 @@ void listarClientes(struct cliente *cliente)
   printf("\n\n# Sexo do cliente (F/M): %s", cliente->sexoCliente);
   printf("\n\n#########################\n\n");
 }
+
+void cadastraProdutos(struct produto*produto),int contador)
+         {
+             produto = (struct produto*)malloc(sizeof(struct produto));
+              produto => cdproduto = contador;
+                  //codigo do produto
+                  printf("\n adicione o codigo do produto");
+                   fflush(stdin);
+                  scanf("%lf",&produto=>cdproduto);
+
+                   printf("\n adicione o nome do produto");
+                   fflush(stdin)
+                   gets(produto=>nomeproduto);
+
+                   printf("\n adicione o valor do produto");
+                   fflush(stdin)
+                    scanf("%0.5lf",&produto=>valorproduto;
+                   fflush(stdin)
+                   printf("\n adicione a marca do produto");
+                     gets(produto=>marcaproduto);
+                     fflush(stdin)
+                   printf("\n adicione o modelo do produto");
+                    gets(produto=>modeloproduto);
+                    printf"\n o seu produto foi cadastrado com sucesso!!!\n");
+
+
+         }
+
+
+
+
+
