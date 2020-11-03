@@ -47,8 +47,9 @@ typedef struct produto product;
 // Definimos a estrutura das compras
 struct compra
 {
-  int qtComprasARealizar,  // Quantidades de compras que o usuario deseja fazer
-      cdCompra,            // Identificação da compra do produto
+  struct cliente comprador;
+  struct produto mercadoria;
+  int cdCompra,            // Identificação da compra do produto
       relacaoCliente,      // Relação da compra com o  usuario
       relacaoProduto,      // Relação da compra com o produto
       qtVenda;             // Quantidade de produtos vendidos
@@ -74,9 +75,51 @@ void RealocaTamanhoStruct(struct estrutura *estrutura, int multiploRealocamento)
   estrutura = realloc(estrutura, multiploRealocamento * sizeof(estrutura));
   if (estrutura == NULL)
   {
-    printf("Limite disponivel no banco de dados atingido");
+    printf("Limite disponivel no banco de dados atingido\n");
   }
   return;
+};
+
+// Validação de email
+int validaEmail(char email[50])
+{
+  // Se o @ e o .com não existir invalida o email
+  if (strstr(email, "@") == NULL && strstr(email, ".com") == NULL)
+  {
+    printf("\nO email inserido nao eh valido\n\n");
+    return 0;
+  }
+  // Se o @ existir e o .com não existir invalida o email
+  else if (strstr(email, "@") != NULL && strstr(email, ".com") == NULL)
+  {
+    printf("\nO email inserido nao eh valido\n\n");
+    return 0;
+  }
+  // Se o @ não existir e o .com existir invalida o email
+  else if (strstr(email, "@") == NULL && strstr(email, ".com") != NULL)
+  {
+    printf("\nO email inserido nao eh valido\n\n");
+    return 0;
+  }
+  // Se houver @ e .com o email é valido
+  else
+  {
+    return 1;
+  }
+}
+
+// Validação do sexo
+int validaSexo(char sexo[2])
+{
+  if (strcmp(strlwr(sexo), "f") != 0 && strcmp(strlwr(sexo), "m") != 0 && strcmp(strlwr(sexo), "o") != 0)
+  {
+    printf("Opcao sexual invalida");
+    return 0;
+  }
+  else
+  {
+    return 1;
+  }
 };
 
 // Resposta do usuario
@@ -93,14 +136,15 @@ void main()
   printf("---{ Iniciando o sistema! }---\n");
   // Declaração das variáveis de controle gerais
   char promptSimNao[2];                                      // Resposta do usuário (Qualquer caractere diferente de s é considerado não pelo sistema);
-  int filaCliente = 1,                                       // Contador de clientes
+  int filaClientes = 1,                                       // Contador de clientes
       filaProdutos = 1,                                      // Contador de produtos
       escolhaMenu;                                           // Escolha do menu
   client *clientes;                                          // Definimos nossa tabela de clientes
-  clientes = (client *)malloc(filaCliente * sizeof(client)); // Alocamos espaço para o cliente
+  clientes = (client *)malloc(filaClientes * sizeof(client)); // Alocamos espaço para o cliente
   if (clientes == NULL)
   {
     printf("Erro ao alocar espaco para os clientes");
+    return;
   }
 
   product *produtos;
@@ -108,6 +152,15 @@ void main()
   if (produtos == NULL)
   {
     printf("Erro ao alocar espaco para os produtos");
+    return;
+  }
+
+  purchase *carrinho;
+  carrinho = (purchase *)malloc(sizeof(purchase)); // Alocamos um espaço para a compra
+  if (carrinho == NULL)
+  {
+    printf("Erro ao alocar espaco para o carrinho");
+    return;
   }
 
   printf("Bem vindo ao MVP do Sr. Oswaldo!\n");
@@ -174,7 +227,7 @@ void main()
       }
       break;
     case 2: // Listagem de clientes
-      if (filaCliente == 1)
+      if (filaClientes == 1)
       {
         printf("Parece que nao existem clientes cadastrados\n");
         printf("Cadastrar um cliente agora (S/n)? ");
@@ -185,9 +238,9 @@ void main()
         {
           do
           {
-            cadastraCliente(&clientes[filaCliente], filaCliente);
-            filaCliente++;
-            RealocaTamanhoStruct(clientes, filaCliente);
+            cadastraCliente(&clientes[filaClientes], filaClientes);
+            filaClientes++;
+            RealocaTamanhoStruct(clientes, filaClientes);
             printf("Cadastrar um novo cliente(S/n)? ");
             fflush(stdin);
             strlwr(gets(promptSimNao));
@@ -209,7 +262,7 @@ void main()
       }
       else
       {
-        for (size_t i = 1; i < filaCliente; i++)
+        for (size_t i = 1; i < filaClientes; i++)
         {
           listarClientes(&clientes[i]);
         }
@@ -230,18 +283,22 @@ void main()
     case 6: // Cadastro direto de cliente
       do
       {
-        cadastraCliente(&clientes[filaCliente], filaCliente);
-        filaCliente++;
-        RealocaTamanhoStruct(clientes, filaCliente);
+        cadastraCliente(&clientes[filaClientes], filaClientes);
+        filaClientes++;
+        RealocaTamanhoStruct(clientes, filaClientes);
         printf("Cadastrar um novo cliente(S/n)? ");
         fflush(stdin);
         strlwr(gets(promptSimNao));
         fflush(stdin);
       } while (promptCompare(promptSimNao) == 1);
+      break;
     default:
       break;
     }
   } while (escolhaMenu != 8);
+  free(clientes);
+  free(produtos);
+  free(carrinho);
 }
 
 // Manipulação de clientes
@@ -257,10 +314,12 @@ void cadastraCliente(struct cliente *cliente, int contador)
   printf("\nInsira o cpf do cliente: ");
   fflush(stdin);
   scanf("%lf", &cliente->cpfCliente);
-  // Email do cliente:
-  printf("\nInsira o email do cliente: ");
-  fflush(stdin);
-  gets(cliente->emailCliente);
+  do
+  {
+    printf("\nInsira o email do cliente: ");
+    fflush(stdin);
+    gets(cliente->emailCliente);
+  } while (validaEmail(cliente->emailCliente) == 0);
   // Telefone do cliente
   printf("\nInsira o telefone fixo do cliente: ");
   fflush(stdin);
@@ -270,10 +329,12 @@ void cadastraCliente(struct cliente *cliente, int contador)
   fflush(stdin);
   gets(cliente->tel.celular);
   // Sexo do cliente:
-  printf("\nInsira o sexo do cliente (F/M): ");
-  fflush(stdin);
-  gets(cliente->sexoCliente);
-
+  do
+  {
+    printf("\nInsira o sexo do cliente (F/M/O): ");
+    fflush(stdin);
+    gets(cliente->sexoCliente);
+  } while (validaSexo(cliente->sexoCliente) == 0);
   printf("\nO cliente foi cadastrado com sucesso!\n");
   printf("\n\nDados do cadastro!\n\n");
   listarClientes(cliente);
@@ -294,7 +355,7 @@ void listarClientes(struct cliente *cliente)
   // Telefone do cliente
   printf("\n\n# Celular do cliente: %s", cliente->tel.celular);
   // Sexo do cliente:
-  printf("\n\n# Sexo do cliente (F/M): %s", cliente->sexoCliente);
+  printf("\n\n# Sexo do cliente (F/M/O): %s", cliente->sexoCliente);
   printf("\n#########################\n\n");
 }
 
