@@ -136,11 +136,11 @@ void main()
   printf("---{ Iniciando o sistema! }---\n");
   // Declaração das variáveis de controle gerais
   char promptSimNao[2];                                      // Resposta do usuário (Qualquer caractere diferente de s é considerado não pelo sistema);
-  int filaClientes = 1,                                       // Contador de clientes
+  int filaClientes = 1,                                      // Contador de clientes
       filaProdutos = 1,                                      // Contador de produtos
       escolhaMenu;                                           // Escolha do menu
   client *clientes;                                          // Definimos nossa tabela de clientes
-  clientes = (client *)malloc(filaClientes * sizeof(client)); // Alocamos espaço para o cliente
+  clientes = (client *)calloc(filaClientes, sizeof(client)); // Alocamos espaço para o cliente
   if (clientes == NULL)
   {
     printf("Erro ao alocar espaco para os clientes");
@@ -148,7 +148,7 @@ void main()
   }
 
   product *produtos;
-  produtos = (product *)malloc(filaProdutos * sizeof(product)); // Alocamos espaço para o produto
+  produtos = (product *)calloc(filaProdutos, sizeof(product)); // Alocamos espaço para o produto
   if (produtos == NULL)
   {
     printf("Erro ao alocar espaco para os produtos");
@@ -156,7 +156,7 @@ void main()
   }
 
   purchase *carrinho;
-  carrinho = (purchase *)malloc(sizeof(purchase)); // Alocamos um espaço para a compra
+  carrinho = (purchase *)calloc(1, sizeof(purchase)); // Alocamos um espaço para a compra
   if (carrinho == NULL)
   {
     printf("Erro ao alocar espaco para o carrinho");
