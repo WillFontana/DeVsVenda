@@ -45,13 +45,20 @@ typedef struct produto product;
 // -----------------------------------
 
 // Definimos a estrutura das compras
+struct produtosNaCompra
+{
+  struct produto mercadoria1;
+  struct produto mercadoria2;
+};
+
 struct compra
 {
   struct cliente comprador;
-  struct produto mercadoria;
+  struct produtosNaCompra produtosAComprar;
   int cdCompra,            // Identificação da compra do produto
       relacaoCliente,      // Relação da compra com o  usuario
-      relacaoProduto,      // Relação da compra com o produto
+      relacaoProduto1,     // Relação da compra com o produto 1
+      relacaoProduto2,     // Relação da compra com o produto 2
       qtVenda;             // Quantidade de produtos vendidos
   double subTotalCompra,   // Subtotal padrao do produto
       prcntDescontoCompra, // Porcentagem do desconto
@@ -69,6 +76,9 @@ void cadastraProdutos(struct produto *produto, int contador), // Cadastro de pro
     listarProdutos(struct produto *produto);                  // Listagem de produtos
 // ---------------------
 
+// Realização de compras
+void realizaCompra(struct compra *compra, int contado, int codCliente, int codProduto);
+
 // Realocamento de tamanho das structs
 void RealocaTamanhoStruct(struct estrutura *estrutura, int multiploRealocamento)
 {
@@ -80,7 +90,7 @@ void RealocaTamanhoStruct(struct estrutura *estrutura, int multiploRealocamento)
   return;
 };
 
-// Validação de email
+// Validação de email'
 int validaEmail(char email[50])
 {
   // Se o @ e o .com não existir invalida o email
@@ -131,15 +141,22 @@ int promptCompare(char prompt[2])
     return 0;
 }
 
+int encontraCliente(int contadorBase, int quantiaClientes);
+
 void main()
 {
   printf("---{ Iniciando o sistema! }---\n");
   // Declaração das variáveis de controle gerais
-  char promptSimNao[2];                                      // Resposta do usuário (Qualquer caractere diferente de s é considerado não pelo sistema);
-  int filaClientes = 1,                                      // Contador de clientes
-      filaProdutos = 1,                                      // Contador de produtos
-      escolhaMenu;                                           // Escolha do menu
+  char promptSimNao[2];  // Resposta do usuário (Qualquer caractere diferente de s é considerado não pelo sistema);
+  int filaClientes = 1,  // Contador de clientes
+      filaProdutos = 1,  // Contador de produtos
+      contadorPadrao,    // Contador padrão para laços
+      ableToProceed = 0, // Controle para habilitar procedência de etapas
+      produtosNaCompra,  // Quantia de produtos diferentes vendidos
+      escolhaMenu;       // Escolha do menu
+
   client *clientes;                                          // Definimos nossa tabela de clientes
+                                                             // typecast
   clientes = (client *)calloc(filaClientes, sizeof(client)); // Alocamos espaço para o cliente
   if (clientes == NULL)
   {
@@ -292,6 +309,195 @@ void main()
         fflush(stdin);
       } while (promptCompare(promptSimNao) == 1);
       break;
+    case 7: // Realização de compras
+      if (filaClientes == 1)
+      {
+        printf("\n\nNao eh possivel realizar uma venda pois nao existem clientes cadastrados\n");
+        printf("Cadastrar um Cliente agora (S/n)? ");
+        fflush(stdin);
+        strlwr(gets(promptSimNao));
+        fflush(stdin);
+        if (promptCompare(promptSimNao) == 1)
+        {
+          do
+          {
+            cadastraCliente(&clientes[filaClientes], filaClientes);
+            filaClientes++;
+            RealocaTamanhoStruct(clientes, filaClientes);
+            printf("Cadastrar um novo cliente(S/n)? ");
+            fflush(stdin);
+            strlwr(gets(promptSimNao));
+            fflush(stdin);
+          } while (promptCompare(promptSimNao) == 1);
+        }
+      }
+      else if (filaProdutos == 1)
+      {
+        printf("\n\nNao eh possivel realizar uma venda pois nao existem produtos cadastrados\n");
+        printf("Cadastrar um Produto agora (S/n)? ");
+        strlwr(gets(promptSimNao));
+        fflush(stdin);
+        if (promptCompare(promptSimNao) == 1)
+        {
+          do
+          {
+            cadastraProdutos(&produtos[filaProdutos], filaProdutos);
+            filaProdutos++;
+            RealocaTamanhoStruct(produtos, filaProdutos);
+            printf("Cadastrar um novo produto(S/n)? ");
+            fflush(stdin);
+            strlwr(gets(promptSimNao));
+            fflush(stdin);
+          } while (promptCompare(promptSimNao) == 1);
+        }
+      }
+      else
+      {
+        printf("\nPor favor insira o codigo de cadastro do cliente: ");
+        fflush(stdin);
+        scanf("%d", &carrinho->relacaoCliente);
+        contadorPadrao = 0;
+        while (contadorPadrao < filaClientes)
+        {
+          if (carrinho->relacaoCliente == clientes[contadorPadrao].cdCliente)
+          {
+            printf("Cliente encontrado: %s\n", clientes[contadorPadrao].nomeCliente);
+            ableToProceed = 1;
+            contadorPadrao = filaClientes + 1;
+          }
+          else
+          {
+            ableToProceed = 0;
+            contadorPadrao++;
+          }
+        }
+        if (ableToProceed < 1)
+        {
+          printf("\nNao foram encontrados clientes com o codigo inserido!\n");
+          printf("Deseja listar todos os produtos cadastrados (S/n)? \n");
+          fflush(stdin);
+          strlwr(gets(promptSimNao));
+          fflush(stdin);
+          if (promptCompare(promptSimNao) == 1)
+          {
+            for (size_t i = 1; i < filaClientes; i++)
+            {
+              listarClientes(&clientes[i]);
+            }
+          }
+          printf("\n\nVoltando ao menu inicial");
+        }
+        else
+        {
+          printf("\nPor favor insira o codigo de cadastro do produto: ");
+          fflush(stdin);
+          scanf("%d", &carrinho->relacaoProduto1);
+          contadorPadrao = 0;
+          while (contadorPadrao < filaProdutos)
+          {
+            if (carrinho->relacaoProduto1 == produtos[contadorPadrao].cdProduto)
+            {
+              printf("Produto encontrado: %s\n", produtos[contadorPadrao].nomeProduto);
+              ableToProceed = 1;
+              contadorPadrao = filaProdutos + 1;
+              produtosNaCompra = 1;
+            }
+            else
+            {
+              ableToProceed = 0;
+              contadorPadrao++;
+            }
+          }
+          if (ableToProceed < 1)
+          {
+            printf("\nNao foram encontrados produtos com o codigo inserido!\n");
+            printf("Deseja listar todos os produtos cadastrados (S/n)? \n");
+            fflush(stdin);
+            strlwr(gets(promptSimNao));
+            fflush(stdin);
+            if (promptCompare(promptSimNao) == 1)
+            {
+              for (size_t i = 1; i < filaProdutos; i++)
+              {
+                listarProdutos(&produtos[i]);
+              }
+            }
+            printf("\nVoltando ao menu inicial");
+          }
+          else
+          {
+            contadorPadrao = 0;
+            printf("\nDeseja adicionar mais um produto? ");
+            fflush(stdin);
+            strlwr(gets(promptSimNao));
+            fflush(stdin);
+            if (promptCompare(promptSimNao) == 1)
+            {
+              printf("\nPor favor insira o codigo de cadastro do produto: ");
+              fflush(stdin);
+              scanf("%d", &carrinho->relacaoProduto2);
+              contadorPadrao = 1;
+              while (contadorPadrao < filaProdutos)
+              {
+                if (carrinho->relacaoProduto2 == produtos[contadorPadrao].cdProduto)
+                {
+                  printf("Produto encontrado: %s\n", produtos[contadorPadrao].nomeProduto);
+                  ableToProceed = 1;
+                  contadorPadrao = filaProdutos + 1;
+                  produtosNaCompra = 2;
+                }
+                else
+                {
+                  ableToProceed = 0;
+                  contadorPadrao++;
+                }
+              }
+              if (ableToProceed < 1)
+              {
+                printf("\nNao foram encontrados produtos com o codigo inserido!\n");
+                printf("Deseja listar todos os produtos cadastrados (S/n)? \n");
+                fflush(stdin);
+                strlwr(gets(promptSimNao));
+                fflush(stdin);
+                if (promptCompare(promptSimNao) == 1)
+                {
+                  for (size_t i = 1; i < filaProdutos; i++)
+                  {
+                    listarProdutos(&produtos[i]);
+                  }
+                }
+                printf("\nVoltando ao menu inicial");
+                return;
+              }
+            }
+            printf("Deseja vender %s ", produtos[carrinho->relacaoProduto1].nomeProduto);
+            if (produtosNaCompra = 2)
+            {
+              printf("e %s ", produtos[carrinho->relacaoProduto2].nomeProduto);
+            }
+            printf("para o cliente %s? (S/n)", clientes[carrinho->relacaoCliente].nomeCliente);
+            fflush(stdin);
+            strlwr(gets(promptSimNao));
+            fflush(stdin);
+            if (promptCompare(promptSimNao) == 1)
+            {
+              carrinho->comprador = clientes[carrinho->relacaoCliente];
+              carrinho->produtosAComprar.mercadoria1 = produtos[carrinho->relacaoProduto1];
+              if (produtosNaCompra = 2)
+              {
+                carrinho->produtosAComprar.mercadoria2 = produtos[carrinho->relacaoProduto2];
+              }
+              printf("Marca do produto: %s", carrinho->produtosAComprar.mercadoria1.model.marcaproduto);
+            }
+            else
+            {
+              printf("\nCompra cancelada");
+              printf("\n\nRetornando ao menu principal");
+            }
+          }
+        }
+      }
+      break;
     default:
       break;
     }
@@ -400,4 +606,9 @@ void listarProdutos(struct produto *produto)
   // Telefone do produto
   printf("\n\n# Valor do produto R$: %0.2lf", produto->valorProduto);
   printf("\n#########################\n\n");
+}
+
+// Realização da compra
+void realizaCompra(struct compra *compra, int contado, int codCliente, int codProduto)
+{
 }
