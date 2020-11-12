@@ -77,11 +77,12 @@ void cadastraProdutos(struct produto *produto, int contador), // Cadastro de pro
 // ---------------------
 
 // Realização de compras
-void realizaCompra(struct compra *compra, int contado, int codCliente, int codProduto);
+evoid realizaCompra(struct compra *compra);
 
 // Realocamento de tamanho das structs
 void RealocaTamanhoStruct(struct estrutura *estrutura, int multiploRealocamento)
 {
+  printf("Mult: %d\n", multiploRealocamento);
   estrutura = realloc(estrutura, multiploRealocamento * sizeof(estrutura));
   if (estrutura == NULL)
   {
@@ -140,8 +141,6 @@ int promptCompare(char prompt[2])
   else
     return 0;
 }
-
-int encontraCliente(int contadorBase, int quantiaClientes);
 
 void main()
 {
@@ -215,7 +214,7 @@ void main()
           {
             cadastraProdutos(&produtos[filaProdutos], filaProdutos);
             filaProdutos++;
-            RealocaTamanhoStruct(produtos, filaProdutos);
+            RealocaTamanhoStruct(&produtos, filaProdutos);
             printf("Cadastrar um novo produto(S/n)? ");
             fflush(stdin);
             strlwr(gets(promptSimNao));
@@ -257,7 +256,7 @@ void main()
           {
             cadastraCliente(&clientes[filaClientes], filaClientes);
             filaClientes++;
-            RealocaTamanhoStruct(clientes, filaClientes);
+            RealocaTamanhoStruct(&clientes, filaClientes);
             printf("Cadastrar um novo cliente(S/n)? ");
             fflush(stdin);
             strlwr(gets(promptSimNao));
@@ -290,7 +289,7 @@ void main()
       {
         cadastraProdutos(&produtos[filaProdutos], filaProdutos);
         filaProdutos++;
-        RealocaTamanhoStruct(produtos, filaProdutos);
+        RealocaTamanhoStruct(&produtos, filaProdutos);
         printf("Cadastrar um novo produto(S/n)? ");
         fflush(stdin);
         strlwr(gets(promptSimNao));
@@ -323,7 +322,7 @@ void main()
           {
             cadastraCliente(&clientes[filaClientes], filaClientes);
             filaClientes++;
-            RealocaTamanhoStruct(clientes, filaClientes);
+            RealocaTamanhoStruct(&clientes, filaClientes);
             printf("Cadastrar um novo cliente(S/n)? ");
             fflush(stdin);
             strlwr(gets(promptSimNao));
@@ -343,7 +342,7 @@ void main()
           {
             cadastraProdutos(&produtos[filaProdutos], filaProdutos);
             filaProdutos++;
-            RealocaTamanhoStruct(produtos, filaProdutos);
+            RealocaTamanhoStruct(&produtos, filaProdutos);
             printf("Cadastrar um novo produto(S/n)? ");
             fflush(stdin);
             strlwr(gets(promptSimNao));
@@ -361,7 +360,8 @@ void main()
         {
           if (carrinho->relacaoCliente == clientes[contadorPadrao].cdCliente)
           {
-            printf("Cliente encontrado: %s\n", clientes[contadorPadrao].nomeCliente);
+            carrinho->comprador = clientes[contadorPadrao];
+            printf("Cliente encontrado: %s\n", carrinho->comprador.nomeCliente);
             ableToProceed = 1;
             contadorPadrao = filaClientes + 1;
           }
@@ -397,7 +397,9 @@ void main()
           {
             if (carrinho->relacaoProduto1 == produtos[contadorPadrao].cdProduto)
             {
-              printf("Produto encontrado: %s\n", produtos[contadorPadrao].nomeProduto);
+              carrinho->produtosAComprar.mercadoria1 = produtos[contadorPadrao];
+              printf("Produto encontrado: %s\n", carrinho->produtosAComprar.mercadoria1.nomeProduto);
+              printf("Custo do produto: %0.2lf\n", carrinho->produtosAComprar.mercadoria1.valorProduto);
               ableToProceed = 1;
               contadorPadrao = filaProdutos + 1;
               produtosNaCompra = 1;
@@ -441,7 +443,8 @@ void main()
               {
                 if (carrinho->relacaoProduto2 == produtos[contadorPadrao].cdProduto)
                 {
-                  printf("Produto encontrado: %s\n", produtos[contadorPadrao].nomeProduto);
+                  carrinho->produtosAComprar.mercadoria2 = produtos[contadorPadrao];
+                  printf("Produto encontrado: %s\n", carrinho->produtosAComprar.mercadoria2.nomeProduto);
                   ableToProceed = 1;
                   contadorPadrao = filaProdutos + 1;
                   produtosNaCompra = 2;
@@ -470,24 +473,18 @@ void main()
                 return;
               }
             }
-            printf("Deseja vender %s ", produtos[carrinho->relacaoProduto1].nomeProduto);
-            if (produtosNaCompra = 2)
+            printf("Deseja vender %s ", carrinho->produtosAComprar.mercadoria1.nomeProduto);
+            if (produtosNaCompra == 2)
             {
-              printf("e %s ", produtos[carrinho->relacaoProduto2].nomeProduto);
+              printf("e %s ", carrinho->produtosAComprar.mercadoria2.nomeProduto);
             }
-            printf("para o cliente %s? (S/n)", clientes[carrinho->relacaoCliente].nomeCliente);
+            printf("para o cliente %s? (S/n)", carrinho->comprador.nomeCliente);
             fflush(stdin);
             strlwr(gets(promptSimNao));
             fflush(stdin);
             if (promptCompare(promptSimNao) == 1)
             {
-              carrinho->comprador = clientes[carrinho->relacaoCliente];
-              carrinho->produtosAComprar.mercadoria1 = produtos[carrinho->relacaoProduto1];
-              if (produtosNaCompra = 2)
-              {
-                carrinho->produtosAComprar.mercadoria2 = produtos[carrinho->relacaoProduto2];
-              }
-              printf("Marca do produto: %s", carrinho->produtosAComprar.mercadoria1.model.marcaproduto);
+              realizaCompra(carrinho);
             }
             else
             {
@@ -609,6 +606,8 @@ void listarProdutos(struct produto *produto)
 }
 
 // Realização da compra
-void realizaCompra(struct compra *compra, int contado, int codCliente, int codProduto)
+void realizaCompra(struct compra *compra)
 {
+  double valor_produto1 = compra->produtosAComprar.mercadoria1.valorProduto;
+  printf("Valor da compra: R$ %0.2lf", valor_produto1);
 }
