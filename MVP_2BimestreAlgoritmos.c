@@ -77,11 +77,12 @@ void cadastraProdutos(struct produto *produto, int contador), // Cadastro de pro
 // ---------------------
 
 // Realização de compras
-evoid realizaCompra(struct compra *compra);
+void realizaCompra(struct compra *compra);
 
 // Realocamento de tamanho das structs
 void RealocaTamanhoStruct(struct estrutura *estrutura, int multiploRealocamento)
 {
+  return;
   printf("Mult: %d\n", multiploRealocamento);
   estrutura = realloc(estrutura, multiploRealocamento * sizeof(estrutura));
   if (estrutura == NULL)
@@ -399,7 +400,6 @@ void main()
             {
               carrinho->produtosAComprar.mercadoria1 = produtos[contadorPadrao];
               printf("Produto encontrado: %s\n", carrinho->produtosAComprar.mercadoria1.nomeProduto);
-              printf("Custo do produto: %0.2lf\n", carrinho->produtosAComprar.mercadoria1.valorProduto);
               ableToProceed = 1;
               contadorPadrao = filaProdutos + 1;
               produtosNaCompra = 1;
