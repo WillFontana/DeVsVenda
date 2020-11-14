@@ -161,7 +161,7 @@ void main()
         printf("Erro ao alocar espaco para os produtos");
         return;
     }
-
+		// Biririririririri
     purchase *carrinho;
     carrinho = (purchase *)calloc(1, sizeof(purchase)); // Alocamos um espaço para a compra
     if (carrinho == NULL)
