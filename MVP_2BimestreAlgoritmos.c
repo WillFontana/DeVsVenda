@@ -60,11 +60,11 @@ struct compra
 			relacaoProduto1,		 // Relação da compra com o produto 1
 			relacaoProduto2,		 // Relação da compra com o produto 2
 			qtVenda1,						 // Quantidade de produtos 1 vendidos
-			subTotalProduto1,		 // Quantidade de produtos 1 vendidos
-			subTotalProduto2,		 // Quantidade de produtos 1 vendidos
 			qtVenda2;						 // Quantidade de produtos 2 vendidos
 	double subTotalCompra,	 // Subtotal padrao do produto
+			subTotalProduto1,		 // Quantidade de produtos 1 vendidos
 			prcntDescontoCompra, // Porcentagem do desconto
+			subTotalProduto2,		 // Quantidade de produtos 1 vendidos
 			valorTotalVenda;		 // Valor final da venda
 };
 typedef struct compra purchase;
@@ -287,7 +287,6 @@ void main()
 		case 6: // Cadastro direto de cliente
 			do
 			{
-				printf("%p", &clientes[filaClientes]);
 				cadastraCliente(&clientes[filaClientes], filaClientes);
 				filaClientes++;
 				printf("Cadastrar um novo cliente(S/n)? ");
@@ -346,7 +345,7 @@ void main()
 				{
 					if (carrinho->relacaoCliente == clientes[contadorPadrao].cdCliente)
 					{
-						printf("Valor do ponteiro do cliente: %p", clientes[contadorPadrao]);
+						// printf("Valor do ponteiro do cliente: %p", clientes[contadorPadrao]);
 						carrinho->comprador = &clientes[contadorPadrao];
 						printf("Cliente encontrado: %s\n", carrinho->comprador->nomeCliente);
 						ableToProceed = 1;
@@ -464,7 +463,7 @@ void main()
 						{
 							printf("e %s ", carrinho->produtosAComprar.mercadoria2->nomeProduto);
 						}
-						printf("para o cliente %s? (S/n)", carrinho->comprador->nomeCliente);
+						printf("para o cliente %s (S/n)?", carrinho->comprador->nomeCliente);
 						fflush(stdin);
 						strlwr(gets(promptSimNao));
 						fflush(stdin);
@@ -496,7 +495,6 @@ void main()
 // Manipulação de clientes
 void cadastraCliente(struct cliente *cliente, int contador)
 {
-	printf("\nDentro da funcao %p", cliente);
 	// Código do cliente
 	cliente->cdCliente = contador;
 	cliente->comprasRealizadas = 0;
@@ -559,7 +557,6 @@ void listarClientes(struct cliente *cliente)
 // Manipulação de produtos
 void cadastraProdutos(struct produto *produto, int contador)
 {
-	printf("Dentro da funcao %p", produto);
 	// Código do produto
 	produto->cdProduto = contador;
 	// Nome do produto
@@ -606,12 +603,13 @@ void listarProdutos(struct produto *produto)
 // Realização da compra
 void realizaCompra(struct compra *compra, int produtosNaCompra)
 {
-	printf("\nPonteiro compra: %p", compra);
+	// printf("\nPonteiro compra: %p", compra);
 	compra->qtVenda1 = 0;
 	compra->qtVenda2 = 0;
 	compra->prcntDescontoCompra = 0;
 	char promptSimNao[2];
 	double valor_produto1 = compra->produtosAComprar.mercadoria1->valorProduto;
+	printf("Valor do produto: %0.2lf\n", valor_produto1);
 	fflush(stdin);
 	double valor_produto2,
 			subTotalProduto2,
@@ -631,7 +629,7 @@ void realizaCompra(struct compra *compra, int produtosNaCompra)
 	subTotalProduto1 = valor_produto1 * compra->qtVenda1;
 	compra->subTotalProduto1 = subTotalProduto1;
 	// Verificamos se o produto possuirá desconto
-	printf("O produto %s possui desconto?", compra->produtosAComprar.mercadoria1->nomeProduto);
+	printf("O produto %s possui desconto  (S/n)?", compra->produtosAComprar.mercadoria1->nomeProduto);
 	fflush(stdin);
 	strlwr(gets(promptSimNao));
 	fflush(stdin);
@@ -641,7 +639,7 @@ void realizaCompra(struct compra *compra, int produtosNaCompra)
 		{
 			printf("\nInsira a porcentagem de desconto: ");
 			fflush(stdin);
-			scanf("%d", &compra->prcntDescontoCompra);
+			scanf("%lf", &compra->prcntDescontoCompra);
 			// Validamos a existencia de uma porcentagem negativa
 			if (compra->prcntDescontoCompra < 0)
 			{
@@ -718,7 +716,28 @@ void realizaCompra(struct compra *compra, int produtosNaCompra)
 		printf(" e tambem %d unidades do produto %s no valor de %0.2lf", compra->qtVenda2, compra->produtosAComprar.mercadoria2->nomeProduto, compra->subTotalProduto2);
 	}
 	printf(";\nPara o cliente %s\n", compra->comprador->nomeCliente);
+
+	printf("\n\n#### --- =========== --- ####\n\n");
+	printf("\n\n#### --- Nota fiscal --- ####\n\n");
+	printf("\n# - Nome do produto: %s", compra->produtosAComprar.mercadoria1);
+	printf("\n# - Modelo do produto: %s", compra->produtosAComprar.mercadoria1->model.modeloproduto);
+	printf("\n# - Marca do produto: %s", compra->produtosAComprar.mercadoria1->model.marcaproduto);
+	printf("\n# - Valor do produto: %0.2lf * %d", compra->produtosAComprar.mercadoria1->valorProduto, compra->qtVenda1);
+	printf("\n\n#### --- =========== --- ####\n\n");
+	if (produtosNaCompra == 2)
+	{
+		printf("\n# - Nome do produto: %s", compra->produtosAComprar.mercadoria2);
+		printf("\n# - Modelo do produto: %s", compra->produtosAComprar.mercadoria2->model.modeloproduto);
+		printf("\n# - Marca do produto: %s", compra->produtosAComprar.mercadoria2->model.marcaproduto);
+		printf("\n# - Valor do produto: %0.2lf * %d", compra->produtosAComprar.mercadoria2->valorProduto, compra->qtVenda1);
+	}
+	printf("\n\n#### --- =========== --- ####\n\n");
+	printf("\n\n#### --- =Comprador= --- ####\n\n");
+	printf("\n# - Nome do cliente: %s", compra->comprador->nomeCliente);
+	printf("\n# - CPF do cliente: %s", compra->comprador->cpfCliente);
+	printf("\n# - Contato do cliente: %s", compra->comprador->tel.telefone);
+	printf("\n\n#### --- =========== --- ####\n\n");
 	// Esse aqui é só pela imersão
-	printf("Foi enviado um email com o comprovante para o email: %s", compra->comprador->emailCliente);
+	printf("Comprovante da compra enviado para o email: %s", compra->comprador->emailCliente);
 	return;
 }
