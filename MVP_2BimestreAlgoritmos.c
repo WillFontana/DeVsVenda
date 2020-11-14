@@ -82,6 +82,9 @@ void cadastraProdutos(struct produto *produto, int contador), // Cadastro de pro
 // Importação dos clientes
 int importClientes(struct cliente *cliente, int contador);
 
+// Importação dos produtos
+int importProdutos(struct produto *produto, int contador);
+
 // Realização de compras
 void realizaCompra(struct compra *compra, int produtosNaCompra);
 
@@ -225,7 +228,12 @@ void main()
 					strlwr(gets(promptSimNao));
 					if (promptCompare(promptSimNao) == 1)
 					{
-						// Importamos os clientes
+						produtosImportados = importProdutos(produtos, filaProdutos);
+						// Somamos a fila de produtos com as novas adições
+						// Utilizamos o +1 pois a fila de novos produtos começa em 0
+						filaProdutos = filaProdutos + produtosImportados + 1;
+						printf("\nProdutos inseridos no sistema");
+						printf("\nNumero de produtos cadastrados no sistema: %d\n", filaProdutos);
 					}
 				}
 			}
@@ -266,7 +274,12 @@ void main()
 					strlwr(gets(promptSimNao));
 					if (promptCompare(promptSimNao) == 1)
 					{
-						// Importamos os clientes
+						clientesImportados = importClientes(clientes, filaClientes);
+						// Somamos a fila de clientes com as novas adições
+						// Utilizamos o +1 pois a fila de novos clientes começa em 0
+						filaClientes = filaClientes + clientesImportados + 1;
+						printf("\nClientes inseridos no sistema");
+						printf("\nNumero de clientes cadastrados no sistema: %d\n", filaClientes);
 					}
 				}
 			}
@@ -279,15 +292,15 @@ void main()
 			}
 			break;
 		case 3:
-			// Verificamos se os clientes foram importados
+			// Verificamos se os produtos foram importados
 			if (produtosImportados == 0)
 			{
-				// produtosImportados = importClientes(produtos, filaProdutos);
-				// Somamos a fila de clientes com as novas adições
-				// Utilizamos o +1 pois a fila de novos clientes começa em 0
-				// filaProdutos = filaProdutos + produtosImportados + 1;
-				// printf("\nClientes inseridos no sistema");
-				// printf("\nNumero de clientes cadastrados no sistema: %d\n", filaProdutos);
+				produtosImportados = importProdutos(produtos, filaProdutos);
+				// Somamos a fila de produtos com as novas adições
+				// Utilizamos o +1 pois a fila de novos produtos começa em 0
+				filaProdutos = filaProdutos + produtosImportados + 1;
+				printf("\nProdutos inseridos no sistema");
+				printf("\nNumero de produtos cadastrados no sistema: %d\n", filaProdutos);
 			}
 			else
 			{
@@ -354,6 +367,23 @@ void main()
 						fflush(stdin);
 					} while (promptCompare(promptSimNao) == 1);
 				}
+				else
+				{
+					// Importar produtos
+					printf("\nVoce tambem pode importar os clientes do banco de dados!\n");
+					printf("Importar os clientes (S/n) ? ");
+					fflush(stdin);
+					strlwr(gets(promptSimNao));
+					if (promptCompare(promptSimNao) == 1)
+					{
+						clientesImportados = importClientes(clientes, filaClientes);
+						// Somamos a fila de clientes com as novas adições
+						// Utilizamos o +1 pois a fila de novos clientes começa em 0
+						filaClientes = filaClientes + clientesImportados + 1;
+						printf("\nClientes inseridos no sistema");
+						printf("\nNumero de clientes cadastrados no sistema: %d\n", filaClientes);
+					}
+				}
 			}
 			else if (filaProdutos == 0)
 			{
@@ -372,6 +402,23 @@ void main()
 						strlwr(gets(promptSimNao));
 						fflush(stdin);
 					} while (promptCompare(promptSimNao) == 1);
+				}
+				else
+				{
+					// Importar produtos
+					printf("\nVoce tambem pode importar os produtos do banco de dados!\n");
+					printf("Importar os produtos (S/n) ? ");
+					fflush(stdin);
+					strlwr(gets(promptSimNao));
+					if (promptCompare(promptSimNao) == 1)
+					{
+						produtosImportados = importProdutos(produtos, filaProdutos);
+						// Somamos a fila de produtos com as novas adições
+						// Utilizamos o +1 pois a fila de novos produtos começa em 0
+						filaProdutos = filaProdutos + produtosImportados + 1;
+						printf("\nProdutos inseridos no sistema");
+						printf("\nNumero de produtos cadastrados no sistema: %d\n", filaProdutos);
+					}
 				}
 			}
 			else
@@ -592,6 +639,125 @@ void listarClientes(struct cliente *cliente)
 	printf("\n#########################\n\n");
 	return;
 }
+// Importação de clientes
+int importClientes(struct cliente *cliente, int contador)
+{
+	// Setamos a quantia de clientes importados
+	int clientesImportados = 0;
+	FILE *clientBackUp;
+	// Abrimos o arquivo de leitura
+	clientBackUp = fopen("clientes_bd.csv", "r");
+	// Caso não seja possivel ler o arquivo
+	if (!clientBackUp)
+	{
+		printf("\nNao foi possivel importar os clientes\n");
+		return 0;
+	}
+	else
+	{
+		printf("\nIniciando a importacao.....\n");
+		// Definimos nossas variaveis de caracteres e strings dinâmicas
+		char c;
+		char *dado = calloc(255, 1);
+		char *texto = calloc(255, 1);
+		do
+		{
+			// Percorremos nossos caracteres
+			c = fgetc(clientBackUp);
+			// Caso altere o campo de valor
+			if (c != ';')
+			{
+				// Caso seja um novo usuário
+				if (c == '\n')
+				{
+					// Somamos a quantia de clientes no banco
+					clientesImportados++;
+					printf("\n\nClientes novo adicionado com sucesso\n\n");
+				}
+				else
+				{
+					// Copiamos o valor lido no arquivo para nossas variaveis dinamicas
+					texto[strlen(texto)] = c;
+					// Adicionamos o \0 no final de cada string
+					texto[strlen(texto) + 1] = '\0';
+				}
+			}
+			else
+			{
+				// Pegamos qual o campo de dados do usuário
+				char *field = strtok(texto, ":");
+				// Enquanto existirem valores
+				while (field != NULL)
+				{
+					// Nome do usuário
+					if (strcmp(strlwr(field), "nome") == 0)
+					{
+						field = strtok(NULL, ":");
+						printf("Nome do usuario usuario: %s\n", field);
+						strcpy(cliente[contador + clientesImportados].nomeCliente, field);
+						// Colocamos aqui qual o código do cliente
+						cliente[contador + clientesImportados].cdCliente = contador + clientesImportados;
+					}
+					// Email do usuário
+					if (strcmp(strlwr(field), "email") == 0)
+					{
+						field = strtok(NULL, ":");
+						printf("Email do usuario usuario: %s\n", field);
+						strcpy(cliente[contador + clientesImportados].emailCliente, field);
+					}
+					// CPF do usuario
+					else if (strcmp(strlwr(field), "cpf") == 0)
+					{
+						field = strtok(NULL, ":");
+						double value = atof(field);
+						printf("CPF do usuario: %0.0lf\n", value);
+						cliente[contador + clientesImportados].cpfCliente = value;
+					}
+					// Compras do usuário
+					else if (strcmp(strlwr(field), "compras") == 0)
+					{
+						field = strtok(NULL, ":");
+						int value = atoi(field);
+						printf("Compras realizadas: %d\n", value);
+						cliente[contador + clientesImportados].comprasRealizadas = value;
+					}
+					// Sexo do usuário
+					else if (strcmp(strlwr(field), "sexo") == 0)
+					{
+						field = strtok(NULL, ":");
+						printf("Sexo do usuario: %s\n", field);
+						strcpy(cliente[contador + clientesImportados].sexoCliente, field);
+					}
+					// Telefone do usuário
+					else if (strcmp(strlwr(field), "telefone") == 0)
+					{
+						field = strtok(NULL, ":");
+						printf("Telefone do usuario: %s\n", field);
+						strcpy(cliente[contador + clientesImportados].tel.telefone, field);
+					}
+					// Celular do usuário
+					else if (strcmp(strlwr(field), "celular") == 0)
+					{
+						field = strtok(NULL, ":");
+						printf("Celular do usuario: %s\n", field);
+						strcpy(cliente[contador + clientesImportados].tel.celular, field);
+					}
+					else
+					{
+						field = strtok(NULL, ":");
+					}
+				}
+				// Limpamos a variavel de texto
+				free(texto);
+				texto = calloc(255, 1);
+			}
+		} while (c != EOF);
+
+		fclose(clientBackUp);
+		// retornamos a nova quantia de clientes
+		return clientesImportados;
+	}
+};
 
 // Manipulação de produtos
 void cadastraProdutos(struct produto *produto, int contador)
@@ -638,6 +804,103 @@ void listarProdutos(struct produto *produto)
 	printf("\n#########################\n\n");
 	return;
 }
+// Importação dos produtos
+int importProdutos(struct produto *produto, int contador)
+{
+	// Setamos a quantia de clientes importados
+	int produtosImportados = 0;
+	FILE *produtosBackUp;
+	// Abrimos o arquivo de leitura
+	produtosBackUp = fopen("produtos_bd.csv", "r");
+	// Caso não seja possivel ler o arquivo
+	if (!produtosBackUp)
+	{
+		printf("\nNao foi possivel importar os produtos\n");
+		return 0;
+	}
+	else
+	{
+		printf("\nIniciando a importacao.....\n");
+		// Definimos nossas variaveis de caracteres e strings dinâmicas
+		char c;
+		char *dado = calloc(255, 1);
+		char *texto = calloc(255, 1);
+		do
+		{
+			// Percorremos nossos caracteres
+			c = fgetc(produtosBackUp);
+			// Caso altere o campo de valor
+			if (c != ';')
+			{
+				// Caso seja um novo usuário
+				if (c == '\n')
+				{
+					// Somamos a quantia de clientes no banco
+					produtosImportados++;
+					printf("\n\nProduto novo adicionado com sucesso\n\n");
+				}
+				else
+				{
+					// Copiamos o valor lido no arquivo para nossas variaveis dinamicas
+					texto[strlen(texto)] = c;
+					// Adicionamos o \0 no final de cada string
+					texto[strlen(texto) + 1] = '\0';
+				}
+			}
+			else
+			{
+				// Pegamos qual o campo de dados do usuário
+				char *field = strtok(texto, ":");
+				// Enquanto existirem valores
+				while (field != NULL)
+				{
+					// Nome do produto
+					if (strcmp(strlwr(field), "nome") == 0)
+					{
+						field = strtok(NULL, ":");
+						printf("Nome do produto: %s\n", field);
+						strcpy(produto[contador + produtosImportados].nomeProduto, field);
+						// Colocamos aqui qual o código do produto
+						produto[contador + produtosImportados].cdProduto = contador + produtosImportados;
+					}
+					// Modelo do produto
+					else if (strcmp(strlwr(field), "modelo") == 0)
+					{
+						field = strtok(NULL, ":");
+						printf("Modelo do produto: %s\n", field);
+						strcpy(produto[contador + produtosImportados].model.modeloproduto, field);
+					}
+					// Marca do produto
+					else if (strcmp(strlwr(field), "marca") == 0)
+					{
+						field = strtok(NULL, ":");
+						printf("Marca do produto: %s\n", field);
+						strcpy(produto[contador + produtosImportados].model.marcaproduto, field);
+					}
+					// Valor do produto
+					else if (strcmp(strlwr(field), "valor") == 0)
+					{
+						field = strtok(NULL, ":");
+						double value = atof(field);
+						printf("Valor do usuario: %0.2lf\n", value);
+						produto[contador + produtosImportados].valorProduto = value;
+					}
+					else
+					{
+						field = strtok(NULL, ":");
+					}
+				}
+				// Limpamos a variavel de texto
+				free(texto);
+				texto = calloc(255, 1);
+			}
+		} while (c != EOF);
+
+		fclose(produtosBackUp);
+		// retornamos a nova quantia de clientes
+		return produtosImportados;
+	}
+};
 
 // Realização da compra
 void realizaCompra(struct compra *compra, int produtosNaCompra)
@@ -783,122 +1046,3 @@ void realizaCompra(struct compra *compra, int produtosNaCompra)
 	printf("Comprovante da compra enviado para o email: %s", compra->comprador->emailCliente);
 	return;
 }
-
-int importClientes(struct cliente *cliente, int contador)
-{
-	// Setamos a quantia de clientes importados
-	int clientesImportados = 0;
-	FILE *clientBackUp;
-	// Abrimos o arquivo de leitura
-	clientBackUp = fopen("clientes_bd.csv", "r");
-	// Caso não seja possivel ler o arquivo
-	if (!clientBackUp)
-	{
-		printf("\nNao foi possivel importar os clientes\n");
-		return 0;
-	}
-	else
-	{
-		printf("\nIniciando a importacao.....\n");
-		// Definimos nossas variaveis de caracteres e strings dinâmicas
-		char c;
-		char *dado = calloc(255, 1);
-		char *texto = calloc(255, 1);
-		do
-		{
-			// Percorremos nossos caracteres
-			c = fgetc(clientBackUp);
-			// Caso altere o campo de valor
-			if (c != ';')
-			{
-				// Caso seja um novo usuário
-				if (c == '\n')
-				{
-					// Somamos a quantia de clientes no banco
-					clientesImportados++;
-					printf("\n\nClientes novo adicionado com sucesso\n\n");
-				}
-				else
-				{
-					// Copiamos o valor lido no arquivo para nossas variaveis dinamicas
-					texto[strlen(texto)] = c;
-					// Adicionamos o \0 no final de cada string
-					texto[strlen(texto) + 1] = '\0';
-				}
-			}
-			else
-			{
-				// Pegamos qual o campo de dados do usuário
-				char *field = strtok(texto, ":");
-				// Enquanto existirem valores
-				while (field != NULL)
-				{
-					// Nome do usuário
-					if (strcmp(strlwr(field), "nome") == 0)
-					{
-						field = strtok(NULL, ":");
-						printf("Nome do usuario usuario: %s\n", field);
-						strcpy(cliente[contador + clientesImportados].nomeCliente, field);
-						// Colocamos aqui qual o código do cliente
-						cliente[contador + clientesImportados].cdCliente = contador + clientesImportados;
-					}
-					// Email do usuário
-					if (strcmp(strlwr(field), "email") == 0)
-					{
-						field = strtok(NULL, ":");
-						printf("Email do usuario usuario: %s\n", field);
-						strcpy(cliente[contador + clientesImportados].emailCliente, field);
-					}
-					// CPF do usuario
-					else if (strcmp(strlwr(field), "cpf") == 0)
-					{
-						field = strtok(NULL, ":");
-						double value = atof(field);
-						printf("CPF do usuario: %0.0lf\n", value);
-						cliente[contador + clientesImportados].cpfCliente = value;
-					}
-					// Compras do usuário
-					else if (strcmp(strlwr(field), "compras") == 0)
-					{
-						field = strtok(NULL, ":");
-						int value = atoi(field);
-						printf("Compras realizadas: %d\n", value);
-						cliente[contador + clientesImportados].comprasRealizadas = value;
-					}
-					// Sexo do usuário
-					else if (strcmp(strlwr(field), "sexo") == 0)
-					{
-						field = strtok(NULL, ":");
-						printf("Sexo do usuario: %s\n", field);
-						strcpy(cliente[contador + clientesImportados].sexoCliente, field);
-					}
-					// Telefone do usuário
-					else if (strcmp(strlwr(field), "telefone") == 0)
-					{
-						field = strtok(NULL, ":");
-						printf("Telefone do usuario: %s\n", field);
-						strcpy(cliente[contador + clientesImportados].tel.telefone, field);
-					}
-					// Celular do usuário
-					else if (strcmp(strlwr(field), "celular") == 0)
-					{
-						field = strtok(NULL, ":");
-						printf("Celular do usuario: %s\n", field);
-						strcpy(cliente[contador + clientesImportados].tel.celular, field);
-					}
-					else
-					{
-						field = strtok(NULL, ":");
-					}
-				}
-				// Limpamos a variavel de texto
-				free(texto);
-				texto = calloc(255, 1);
-			}
-		} while (c != EOF);
-
-		fclose(clientBackUp);
-		// retornamos a nova quantia de clientes
-		return clientesImportados;
-	}
-};
