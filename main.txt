@@ -1,5 +1,5 @@
 l = n
-3 = 0
+3 = o
 1 = a
 t = r
 r = t
@@ -9,6 +9,19 @@ m = b
 n = l
 
 se voce conseguiu traduzir esse texto desenvolvendo seu proprio programa
-significa que esta com meio caminho andado para usar a chave nepubast0 // lezum1sr0
+significa que esta com meio caminho andado para usar a chave nepubast0  
 e conquistar esse pais gelado mas antes disso voce ainda precisa usar o
 resto do mundo, boa sorte!
+
+
+lezum1sr0
+
+nepubast0
+
+0rs1muzel
+
+
+sevoceconseguiurraduziresserexrodesenvonvendoseuzrozriozrograbasignificaqueesracobbeiocabinhoandado
+zarausarachave
+nezubasr0
+econquisraressezaisgenado basanresdissovoceaindazrecisausaroresrodobundo,boasorre!
