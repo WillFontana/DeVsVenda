@@ -17,16 +17,16 @@ struct contato
 };
 struct cliente
 {
-	int cdCliente,				 // Codigo do cliente
-			posicaoFila,			 // Posição da pessoa na fila
-			comprasRealizadas; // Compras realizadas
-	char nomeCliente[50],	 // Nome do Cliente
-			sexoCliente[2],		 // Sexo do Cliente
-			emailCliente[50];	 // Email do Cliente
-	double cpfCliente;		 // CPF do cliente
-	struct contato tel;
-	struct cliente *proximoCliente;
-	struct cliente *clienteAnterior;
+	int posicaoFila,								 // Posição da pessoa na fila
+			comprasRealizadas;					 // Compras realizadas
+	char nomeCliente[50],						 // Nome do Cliente
+			sexoCliente[2],							 // Sexo do Cliente
+			emailCliente[50];						 // Email do Cliente
+	double cdCliente,								 // Codigo do cliente
+			cpfCliente;									 // CPF do cliente
+	struct contato tel;							 // Telefones do cliente
+	struct cliente *proximoCliente;	 // Proximo cliente na fila
+	struct cliente *clienteAnterior; // Cliente anterior na fila
 };
 typedef struct cliente client;
 // -----------------------------------
@@ -39,11 +39,13 @@ struct modelo
 };
 struct produto
 {
-	int cdProduto,				//codigo do produto
-			posicaoFila;			// Posição do produto na fila
-	char nomeProduto[50]; //nome do produto
-	double valorProduto;	// valor do produto
-	struct modelo model;	// variações do produto
+	int cdProduto,									 //codigo do produto
+			posicaoFila;								 // Posição do produto na fila
+	char nomeProduto[50];						 //nome do produto
+	double valorProduto;						 // valor do produto
+	struct modelo model;						 // variações do produto
+	struct produto *proximoProduto;	 // Proximo produto na fila
+	struct produto *produtoAnterior; // Produto anterior na fila
 };
 typedef struct produto product;
 // -----------------------------------
@@ -89,13 +91,12 @@ int importClientes(struct cliente *cliente, int contador);
 void ordenaCliente(struct cliente *cliente, int contador);
 // Inserção de clientes no final da fila
 void inserirClienteNaFila(struct cliente *cliente, int contador);
-
+// Inserção de produtos no final da fila
+void inserirProdutosNaFila(struct produto *produto, int contador);
 // Importação dos produtos
 int importProdutos(struct produto *produto, int contador);
-
 // Realização de compras
 void realizaCompra(struct compra *compra, int produtosNaCompra);
-
 // Validação de email'
 int validaEmail(char email[50])
 {
@@ -123,7 +124,6 @@ int validaEmail(char email[50])
 		return 1;
 	}
 }
-
 // Validação do sexo
 int validaSexo(char sexo[2])
 {
@@ -137,7 +137,6 @@ int validaSexo(char sexo[2])
 		return 1;
 	}
 };
-
 // Resposta do usuario
 int promptCompare(char prompt[2])
 {
@@ -149,6 +148,7 @@ int promptCompare(char prompt[2])
 
 void main()
 {
+
 	printf("---{ Iniciando o sistema! }---\n");
 	// Declaração das variáveis de controle gerais
 	char promptSimNao[2];				// Resposta do usuário (Qualquer caractere diferente de s é considerado não pelo sistema);
@@ -158,6 +158,8 @@ void main()
 			clientesImportados = 0, // Verificamos se os clientes já foram importados
 			produtosImportados = 0, // Verificamos se os produtos já foram importados
 			ableToProceed = 0,			// Controle para habilitar procedência de etapas
+			ClienteEncontrado,			// Cliente encontrado na busca por CPF
+			ProdutoEncontrado,			// Produto encontrado pelo código de cadastro
 			produtosNaCompra,				// Quantia de produtos diferentes vendidos
 			escolhaMenu;						// Escolha do menu
 
@@ -175,7 +177,6 @@ void main()
 	clientes->proximoCliente = NULL;
 	clientes->clienteAnterior = NULL;
 
-
 	product *produtos;
 	produtos = (product *)calloc(1, sizeof(product)); // Alocamos espaço para o produto
 	if (produtos == NULL)
@@ -183,7 +184,9 @@ void main()
 		printf("Erro ao alocar espaco para os produtos");
 		return;
 	}
-	// Biririririririri
+	produtos->proximoProduto = NULL;
+	produtos->produtoAnterior = NULL;
+
 	purchase *carrinho;
 	carrinho = (purchase *)calloc(1, sizeof(purchase)); // Alocamos um espaço para a compra
 	if (carrinho == NULL)
@@ -206,10 +209,12 @@ void main()
 		printf("\t|\t4 Importar Clientes\n");
 		printf("5 Encontrar Produdos");
 		printf("\t|\t6 Ordenar Clientes\n");
-		printf("7 Cadastrar Produtos");
-		printf("\t|\t8 Cadastrar Clientes\n");
-		printf("9 Realizar venda");
-		printf("\t|\t10 Finzalizar o programa\n");
+		printf("7 Encontrar Produtos");
+		printf("\t|\t8 Encontrar Clientes\n");
+		printf("9 Cadastrar Produtos");
+		printf("\t|\t10 Cadastrar Clientes\n");
+		printf("11 Realizar venda");
+		printf("\t|\t12 Finzalizar o programa\n");
 		printf("Escolha uma opcao: -- ");
 		scanf("%d", &escolhaMenu);
 		fflush(stdin);
@@ -228,6 +233,7 @@ void main()
 					do
 					{
 						cadastraProdutos(&produtos[filaProdutos], filaProdutos);
+						inserirProdutosNaFila(produtos, filaProdutos);
 						filaProdutos++;
 						maxProdutos = filaProdutos;
 						printf("Cadastrar um novo produto(S/n) ? ");
@@ -276,6 +282,7 @@ void main()
 					do
 					{
 						cadastraCliente(&clientes[filaClientes], filaClientes);
+						inserirClienteNaFila(clientes, filaClientes);
 						filaClientes++;
 						maxClientes = filaClientes;
 						printf("Cadastrar um novo cliente(S/n) ? ");
@@ -296,7 +303,9 @@ void main()
 						clientesImportados = importClientes(clientes, filaClientes);
 						// Somamos a fila de clientes com as novas adições
 						// Utilizamos o +1 pois a fila de novos clientes começa em 0
-						filaClientes = filaClientes + clientesImportados + 1;
+						filaClientes = filaClientes + clientesImportados;
+						inserirClienteNaFila(clientes, filaClientes);
+						filaClientes = filaClientes + 1;
 						maxClientes = filaClientes;
 						printf("\nClientes inseridos no sistema");
 						printf("\nNumero de clientes cadastrados no sistema: %d\n", filaClientes);
@@ -336,7 +345,9 @@ void main()
 				clientesImportados = importClientes(clientes, filaClientes);
 				// Somamos a fila de clientes com as novas adições
 				// Utilizamos o +1 pois a fila de novos clientes começa em 0
-				filaClientes = filaClientes + clientesImportados + 1;
+				filaClientes = filaClientes + clientesImportados;
+				inserirClienteNaFila(clientes, filaClientes);
+				filaClientes = filaClientes + 1;
 				maxClientes = filaClientes;
 				printf("\nClientes inseridos no sistema");
 				printf("\nNumero de clientes cadastrados no sistema: %d\n", filaClientes);
@@ -347,13 +358,84 @@ void main()
 			}
 			printf("\nRetornando ao menu inicial\n");
 			break;
-		case 6: // Ordenação de clientes por CPF
-			ordenaCliente(clientes, filaClientes);
+		case 5: // Ordenação de clientes por CPF
+			if (filaProdutos == 0)
+			{
+				printf("\nO sistema ainda nao possui produtos para ordenar!\n");
+			}
+			else
+			{
+				ordenaProdutos(produtos, filaProdutos);
+				printf("Produtos ordenados com sucesso!");
+			}
 			break;
-		case 7: // Cadastro direto de produtos
+		case 6: // Ordenação de clientes por CPF
+			if (filaClientes == 0)
+			{
+				printf("\nO sistema ainda nao possui clientes para ordenar!\n");
+			}
+			else
+			{
+				ordenaCliente(clientes, filaClientes);
+				printf("Clientes ordenados com sucesso!");
+			}
+			break;
+		case 7: // Busca do produto pelo código
+			// Verificamos existencia de produtos
+			if (filaProdutos == 0)
+			{
+				printf("\n\nNao existem produtos cadastrados no sistema para encontrar");
+				return;
+			}
+			else
+			{
+				// Ordenamos os produtos para que a busca binária funcione
+				ordenaProdutos(produtos, filaProdutos);
+				ProdutoEncontrado = encontraProduto(filaProdutos, produtos);
+				// Caso o produto exista
+				if (ProdutoEncontrado >= 0)
+				{
+					printf("\n\nProduto encontrado!\n");
+					printf("Dados do produto:\n");
+					listarProdutos(&produtos[ProdutoEncontrado]);
+				}
+				else
+				{
+					printf("\n\nProduto nao encontrado!\n");
+				}
+			}
+			break;
+			break;
+		case 8: // Busca por cliente pelo CPF
+			// Verificamos a exitencia de clientes
+			if (filaClientes == 0)
+			{
+				printf("\n\nNao existem clientes cadastrados no sistema para encontrar");
+				return;
+			}
+			else
+			{
+				// Ordenamos os clientes para que a busca binária funcione
+				ordenaCliente(clientes, filaClientes);
+				ClienteEncontrado = encontraCliente(filaClientes, clientes);
+				// Caso o cliente exista
+				if (ClienteEncontrado >= 0)
+				{
+					printf("\n\nCliente encontrado!\n");
+					printf("Dados do cliente:\n");
+					listarClientes(&clientes[ClienteEncontrado]);
+				}
+				else
+				{
+					printf("\n\nCliente nao encontrado!\n");
+				}
+			}
+			break;
+		case 9: // Cadastro direto de produtos
 			do
 			{
 				cadastraProdutos(&produtos[filaProdutos], filaProdutos);
+				inserirProdutosNaFila(produtos, filaProdutos);
 				filaProdutos++;
 				maxProdutos = filaProdutos;
 				printf("Cadastrar um novo produto(S/n) ? ");
@@ -362,7 +444,7 @@ void main()
 				fflush(stdin);
 			} while (promptCompare(promptSimNao) == 1);
 			break;
-		case 8: // Cadastro direto de cliente
+		case 10: // Cadastro direto de cliente
 			do
 			{
 				cadastraCliente(&clientes[filaClientes], filaClientes);
@@ -375,7 +457,7 @@ void main()
 				fflush(stdin);
 			} while (promptCompare(promptSimNao) == 1);
 			break;
-		case 9: // Realização de compras
+		case 11: // Realização de compras
 			if (filaClientes == 0)
 			{
 				printf("\n\nNao eh possivel realizar uma venda pois nao existem clientes cadastrados\n");
@@ -388,6 +470,7 @@ void main()
 					do
 					{
 						cadastraCliente(&clientes[filaClientes], filaClientes);
+						inserirClienteNaFila(clientes, filaClientes);
 						filaClientes++;
 						maxClientes = filaClientes;
 						printf("Cadastrar um novo cliente(S/n) ? ");
@@ -408,7 +491,9 @@ void main()
 						clientesImportados = importClientes(clientes, filaClientes);
 						// Somamos a fila de clientes com as novas adições
 						// Utilizamos o +1 pois a fila de novos clientes começa em 0
-						filaClientes = filaClientes + clientesImportados + 1;
+						filaClientes = filaClientes + clientesImportados;
+						inserirClienteNaFila(clientes, filaClientes);
+						filaClientes = filaClientes + 1;
 						maxClientes = filaClientes;
 						printf("\nClientes inseridos no sistema");
 						printf("\nNumero de clientes cadastrados no sistema: %d\n", filaClientes);
@@ -426,6 +511,7 @@ void main()
 					do
 					{
 						cadastraProdutos(&produtos[filaProdutos], filaProdutos);
+						inserirProdutosNaFila(produtos, filaProdutos);
 						filaProdutos++;
 						maxProdutos = filaProdutos;
 						printf("Cadastrar um novo produto(S/n) ? ");
@@ -604,7 +690,7 @@ void main()
 		default:
 			break;
 		}
-	} while (escolhaMenu != 10);
+	} while (escolhaMenu != 12);
 	free(clientes);
 	free(produtos);
 	free(carrinho);
@@ -613,18 +699,34 @@ void main()
 // Manipulação de clientes
 void cadastraCliente(struct cliente *cliente, int contador)
 {
+	int ableToProceed;
 	// Código do cliente
-	cliente->cdCliente = contador;
 	cliente->comprasRealizadas = 0;
 	cliente->posicaoFila = contador;
 	// Nome do cliente:
 	printf("\nInsira o nome do cliente: ");
 	fflush(stdin);
 	gets(cliente->nomeCliente);
-	// CPF do cliente:
-	printf("\nInsira o cpf do cliente: ");
-	fflush(stdin);
-	scanf("%lf", &cliente->cpfCliente);
+	do
+	{
+
+		// CPF do cliente:
+		printf("\nInsira o cpf do cliente: ");
+		fflush(stdin);
+		scanf("%lf", &cliente->cpfCliente);
+		if (sizeof(cliente->cpfCliente) > 7)
+		{
+			printf("\nCpf inserido invalido!");
+			ableToProceed = 0;
+		}
+		else
+		{
+			cliente->cdCliente = cliente->cpfCliente;
+			ableToProceed = 1;
+		}
+
+	} while (ableToProceed = 0);
+
 	do
 	{
 		printf("\nInsira o email do cliente: ");
@@ -656,7 +758,7 @@ void listarClientes(struct cliente *cliente)
 	// printf("\nDentro da listagem %p", cliente);
 	// Codigo do cliente:
 	printf("\n\n#########################");
-	printf("\n# Codigo do cadastro do cliente: %d", cliente->cdCliente);
+	printf("\n# Codigo do cadastro do cliente: %0.0lf", cliente->cdCliente);
 	// Nome do cliente:
 	printf("\n\n# Nome do cliente: %s", cliente->nomeCliente);
 	// CPF do cliente:
@@ -731,7 +833,6 @@ int importClientes(struct cliente *cliente, int contador)
 						printf("Nome do usuario usuario: %s\n", field);
 						strcpy(cliente[contador + clientesImportados].nomeCliente, field);
 						// Colocamos aqui qual o código do cliente
-						cliente[contador + clientesImportados].cdCliente = contador + clientesImportados;
 						cliente[contador + clientesImportados].posicaoFila = contador + clientesImportados;
 					}
 					// Email do usuário
@@ -748,6 +849,7 @@ int importClientes(struct cliente *cliente, int contador)
 						double value = atof(field);
 						printf("CPF do usuario: %0.0lf\n", value);
 						cliente[contador + clientesImportados].cpfCliente = value;
+						cliente[contador + clientesImportados].cdCliente = value;
 					}
 					// Compras do usuário
 					else if (strcmp(strlwr(field), "compras") == 0)
@@ -1083,12 +1185,13 @@ void realizaCompra(struct compra *compra, int produtosNaCompra)
 	return;
 }
 
+// Buscas Binárias
 int encontraProduto(int maxVal, struct produto *produto)
 {
 	int minVal = 0,
 			meioFila = (minVal + maxVal) / 2;
 	int codProduto;
-	printf("\nInsira o codigo do produto a ser encontrado: \n");
+	printf("\nInsira o codigo do produto a ser encontrado: ");
 	scanf("%d", &codProduto);
 	while (minVal <= maxVal && produto[meioFila].cdProduto != codProduto)
 	{
@@ -1116,7 +1219,7 @@ int encontraCliente(int maxVal, struct cliente *cliente)
 	int minVal = 0,
 			meioFila = (minVal + maxVal) / 2;
 	double cpfCliente;
-	printf("\nInsira o codigo do produto a ser encontrado: \n");
+	printf("\nInsira o cpf do cliente a ser encontrado: ");
 	scanf("%lf", &cpfCliente);
 	while (minVal <= maxVal && cliente[meioFila].cpfCliente != cpfCliente)
 	{
@@ -1136,17 +1239,22 @@ int encontraCliente(int maxVal, struct cliente *cliente)
 	}
 	else
 	{
-		return 0;
+		meioFila = -1;
 	}
+	return meioFila;
 };
 
+// Ordenação de filas
 void ordenaCliente(struct cliente *cliente, int contador)
 {
-	return;
-	int posicaAuxiliar;
+	// Criamos um inteiro para guardar a posição na fila de cada elemento
+	int posicaoAuxiliar;
+
+	// Criamos os ponteiros auxiliares para alterar as posições na fila
 	struct cliente *ponteiroAuxiliarClienteAnterior = (struct cliente *)calloc(1, sizeof(struct cliente *));
 	struct cliente *ponteiroAuxiliarProximoCliente = (struct cliente *)calloc(1, sizeof(struct cliente *));
-	struct cliente *ponteiroAntigo = (struct cliente *)calloc(contador, sizeof(struct cliente *));
+	// Criamos um ponteiro intermediario para troca de dados
+	struct cliente ponteiroAntigo;
 
 	for (size_t i = 0; i < contador - 1; i++)
 	{
@@ -1154,23 +1262,40 @@ void ordenaCliente(struct cliente *cliente, int contador)
 		{
 			if (cliente[j].cpfCliente > cliente[j + 1].cpfCliente)
 			{
-				ponteiroAuxiliarProximoCliente = &cliente[j].proximoCliente;
-				ponteiroAuxiliarClienteAnterior = &cliente[j].clienteAnterior;
-				posicaAuxiliar = cliente[j].posicaoFila;
-				
-				
-				cliente[j] = cliente[j + 1];
+				// Atribuimos o valor do ponteiro a ser modificado
+				ponteiroAntigo = cliente[j];
 
-				cliente[j].posicaoFila = cliente[j + 1].posicaoFila;
-				cliente[j].proximoCliente = &cliente[j + 1].proximoCliente;
-				cliente[j].clienteAnterior = cliente[j + 1].clienteAnterior;
-				
-				cliente[j + 1].posicaoFila = posicaAuxiliar;
+				// Salvamos os ponteiros da fila encadeada
+				ponteiroAuxiliarProximoCliente = &cliente[j + 1].proximoCliente;
+				ponteiroAuxiliarClienteAnterior = &cliente[j + 1].clienteAnterior;
+				// Pegamos a posição do elemento na fila
+				posicaoAuxiliar = cliente[j + 1].posicaoFila;
+
+				// Fazemos a troca de valores entre as structs
+				cliente[j] = cliente[j + 1];
+				cliente[j + 1] = ponteiroAntigo;
+
+				// Atualizamos o cliente  anterior de acordo com a nova ordenação
+				cliente[j].clienteAnterior = &ponteiroAntigo.clienteAnterior;
+				// Atualizamos o prómixo fila de acordo com a nova ordenação
+				cliente[j].proximoCliente = &cliente[j + 1];
+
+				// Atualizamos o anterior da fila de acordo com a nova ordenação
+				cliente[j + 1].clienteAnterior = &cliente[j];
+
+				// Atualizamos a fila no cliente jogado para frente
 				cliente[j + 1].proximoCliente = ponteiroAuxiliarProximoCliente;
-				cliente[j + 1].clienteAnterior = ponteiroAuxiliarClienteAnterior;
+
+				// Atualizamos as posições na fila
+				cliente[j].posicaoFila = ponteiroAntigo.posicaoFila;
+				cliente[j + 1].posicaoFila = posicaoAuxiliar;
 			}
 		}
 	}
+
+	// Definimos o ultimo e o primeiro cliente da fila novamente
+	cliente[contador].proximoCliente = NULL;
+	cliente[0].clienteAnterior = NULL;
 	for (size_t k = 0; k < contador; k++)
 	{
 		listarClientes(&cliente[k]);
@@ -1178,7 +1303,14 @@ void ordenaCliente(struct cliente *cliente, int contador)
 };
 void ordenaProdutos(struct produto *produto, int contador)
 {
-	int ordenacaoAuxiliar;
+	// Criamos um inteiro para guardar a posição na fila de cada elemento
+	int posicaoAuxiliar;
+
+	// Criamos os ponteiros auxiliares para alterar as posições na fila
+	struct produto *ponteiroAuxiliarProdutoAnterior = (struct produto *)calloc(1, sizeof(struct produto *));
+	struct produto *ponteiroAuxiliarProximoProduto = (struct produto *)calloc(1, sizeof(struct produto *));
+	// Criamos um ponteiro intermediario para troca de dados
+	struct produto ponteiroAntigo;
 
 	for (size_t i = 0; i < contador - 1; i++)
 	{
@@ -1186,18 +1318,47 @@ void ordenaProdutos(struct produto *produto, int contador)
 		{
 			if (produto[j].cdProduto > produto[j + 1].cdProduto)
 			{
-				ordenacaoAuxiliar = produto[j].posicaoFila;
-				produto[j].posicaoFila = produto[j + 1].posicaoFila;
-				produto[j + 1].posicaoFila = ordenacaoAuxiliar;
+				// Atribuimos o valor do ponteiro a ser modificado
+				ponteiroAntigo = produto[j];
+
+				// Salvamos os ponteiros da fila encadeada
+				ponteiroAuxiliarProximoProduto = &produto[j + 1].proximoProduto;
+				ponteiroAuxiliarProdutoAnterior = &produto[j + 1].produtoAnterior;
+				// Pegamos a posição do elemento na fila
+				posicaoAuxiliar = produto[j + 1].posicaoFila;
+
+				// Fazemos a troca de valores entre as structs
+				produto[j] = produto[j + 1];
+				produto[j + 1] = ponteiroAntigo;
+
+				// Atualizamos o cliente  anterior de acordo com a nova ordenação
+				produto[j].produtoAnterior = &ponteiroAntigo.produtoAnterior;
+				// Atualizamos o prómixo fila de acordo com a nova ordenação
+				produto[j].proximoProduto = &produto[j + 1];
+
+				// Atualizamos o anterior da fila de acordo com a nova ordenação
+				produto[j + 1].produtoAnterior = &produto[j];
+
+				// Atualizamos a fila no cliente jogado para frente
+				produto[j + 1].proximoProduto = ponteiroAuxiliarProximoProduto;
+
+				// Atualizamos as posições na fila
+				produto[j].posicaoFila = ponteiroAntigo.posicaoFila;
+				produto[j + 1].posicaoFila = posicaoAuxiliar;
 			}
 		}
 	}
+
+	// Definimos o ultimo e o primeiro cliente da fila novamente
+	produto[contador].proximoProduto = NULL;
+	produto[0].produtoAnterior = NULL;
 	for (size_t k = 0; k < contador; k++)
 	{
 		listarProdutos(&produto[k]);
 	}
 };
 
+// Criação de filas
 void inserirClienteNaFila(struct cliente *cliente, int contador)
 {
 	// printf("\nPonteiro do cliente %p\n", &cliente[contador]);
@@ -1214,3 +1375,19 @@ void inserirClienteNaFila(struct cliente *cliente, int contador)
 	// Definimos para o último cliente o próximo como null
 	cliente[contador].proximoCliente = NULL;
 };
+void inserirProdutosNaFila(struct produto *produto, int contador)
+{
+	// printf("\nPonteiro do produto %p\n", &produto[contador]);
+
+	// Verificamos se o cliente não é o primeiro da lista
+	if (contador > 0)
+	{
+		// Apontamos o cliente atual como próximo cliente da fila
+		produto[contador - 1].proximoProduto = &produto[contador];
+		// Colocamos o cliente anterior como o cliente anterior na fila
+		produto[contador].produtoAnterior = &produto[contador - 1];
+		// printf("\nPonteiro desse cliente: %p\n", cliente[contador - 1].proximoCliente);
+	}
+	// Definimos para o último proximoProduto o próximo como null
+	produto[contador].proximoProduto = NULL;
+}
