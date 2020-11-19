@@ -17,13 +17,13 @@ struct contato
 };
 struct cliente
 {
-	int posicaoFila,								 // Posição da pessoa na fila
+	int cdCliente,									 // Codigo do cliente
+			posicaoFila,								 // Posição da pessoa na fila
 			comprasRealizadas;					 // Compras realizadas
 	char nomeCliente[50],						 // Nome do Cliente
 			sexoCliente[2],							 // Sexo do Cliente
 			emailCliente[50];						 // Email do Cliente
-	double cdCliente,								 // Codigo do cliente
-			cpfCliente;									 // CPF do cliente
+	double cpfCliente;							 // CPF do cliente
 	struct contato tel;							 // Telefones do cliente
 	struct cliente *proximoCliente;	 // Proximo cliente na fila
 	struct cliente *clienteAnterior; // Cliente anterior na fila
@@ -75,6 +75,14 @@ struct compra
 };
 typedef struct compra purchase;
 
+struct listagemCLientes
+{
+	struct cliente *primeiroCliente; // Proximo cliente na fila
+	struct cliente *ultimoCliente;	 // Cliente anterior na fila
+};
+
+void listarFilaClientes(struct listagemCLientes *listagemCLientes);
+
 // Interações do cliente
 void cadastraCliente(struct cliente *cliente, int contador), // Cadastro de cliente
 		listarClientes(struct cliente *cliente);								 // Listagem de cliente
@@ -84,6 +92,11 @@ void cadastraCliente(struct cliente *cliente, int contador), // Cadastro de clie
 void cadastraProdutos(struct produto *produto, int contador), // Cadastro de produtos
 		listarProdutos(struct produto *produto);									// Listagem de produtos
 // ---------------------
+
+// Listagens de clientes
+struct listagemCLientes *criarListagemDeClientes();
+
+void inserirClienteNaListagem(struct listagemCLientes *listagemCLientes, struct cliente *cliente);
 
 // Importação dos clientes
 int importClientes(struct cliente *cliente, int contador);
@@ -145,6 +158,8 @@ int promptCompare(char prompt[2])
 	else
 		return 0;
 }
+// Atribuição do cdCliente pelo cpf
+int generateCdCliente(double cpfCliente);
 
 void main()
 {
@@ -166,6 +181,9 @@ void main()
 	// Variáveis para busca binária
 	int base = 0, maxProdutos = filaProdutos, maxClientes = filaClientes;
 
+	// Criamos nossas listagens
+	struct listagemCLientes *listaDeClientes = criarListagemDeClientes();
+
 	client *clientes; // Definimos nossa tabela de clientes
 	// typecast
 	clientes = (client *)calloc(1, sizeof(client)); // Alocamos espaço para o cliente
@@ -174,6 +192,7 @@ void main()
 		printf("Erro ao alocar espaco para os clientes");
 		return;
 	}
+
 	clientes->proximoCliente = NULL;
 	clientes->clienteAnterior = NULL;
 
@@ -314,9 +333,9 @@ void main()
 			}
 			else
 			{
+				listarFilaClientes(listaDeClientes);
 				for (size_t i = 0; i < filaClientes; i++)
 				{
-					listarClientes(&clientes[i]);
 				}
 			}
 			break;
@@ -347,6 +366,7 @@ void main()
 				// Utilizamos o +1 pois a fila de novos clientes começa em 0
 				filaClientes = filaClientes + clientesImportados;
 				inserirClienteNaFila(clientes, filaClientes);
+				inserirClienteNaListagem(listaDeClientes, clientes);
 				filaClientes = filaClientes + 1;
 				maxClientes = filaClientes;
 				printf("\nClientes inseridos no sistema");
@@ -449,6 +469,7 @@ void main()
 			{
 				cadastraCliente(&clientes[filaClientes], filaClientes);
 				inserirClienteNaFila(clientes, filaClientes);
+				inserirClienteNaListagem(listaDeClientes, &clientes[filaClientes]);
 				filaClientes++;
 				maxClientes = filaClientes;
 				printf("Cadastrar um novo cliente(S/n) ? ");
@@ -714,14 +735,14 @@ void cadastraCliente(struct cliente *cliente, int contador)
 		printf("\nInsira o cpf do cliente: ");
 		fflush(stdin);
 		scanf("%lf", &cliente->cpfCliente);
-		if (sizeof(cliente->cpfCliente) > 7)
+		if (cliente->cpfCliente == 0)
 		{
 			printf("\nCpf inserido invalido!");
 			ableToProceed = 0;
 		}
 		else
 		{
-			cliente->cdCliente = cliente->cpfCliente;
+			cliente->cdCliente = generateCdCliente(cliente->cpfCliente);
 			ableToProceed = 1;
 		}
 
@@ -758,7 +779,7 @@ void listarClientes(struct cliente *cliente)
 	// printf("\nDentro da listagem %p", cliente);
 	// Codigo do cliente:
 	printf("\n\n#########################");
-	printf("\n# Codigo do cadastro do cliente: %0.0lf", cliente->cdCliente);
+	printf("\n# Codigo do cadastro do cliente: %d", cliente->cdCliente);
 	// Nome do cliente:
 	printf("\n\n# Nome do cliente: %s", cliente->nomeCliente);
 	// CPF do cliente:
@@ -849,7 +870,7 @@ int importClientes(struct cliente *cliente, int contador)
 						double value = atof(field);
 						printf("CPF do usuario: %0.0lf\n", value);
 						cliente[contador + clientesImportados].cpfCliente = value;
-						cliente[contador + clientesImportados].cdCliente = value;
+						cliente[contador + clientesImportados].cdCliente = generateCdCliente(value);
 					}
 					// Compras do usuário
 					else if (strcmp(strlwr(field), "compras") == 0)
@@ -900,21 +921,47 @@ int importClientes(struct cliente *cliente, int contador)
 // Manipulação de produtos
 void cadastraProdutos(struct produto *produto, int contador)
 {
-	// Código do produto
-	produto->cdProduto = contador;
+	int abbleToProceed = 0;
 	// Nome do produto
 	printf("\nInsira o nome do produto: ");
 	fflush(stdin);
 	gets(produto->nomeProduto);
 	// Marca do produto
-	printf("\nInsira a marca do produto: ");
-	fflush(stdin);
-	gets(produto->model.marcaproduto);
+	do
+	{
+		printf("\nInsira a marca do produto: ");
+		fflush(stdin);
+		gets(produto->model.marcaproduto);
+		if (!produto->model.marcaproduto)
+		{
+			printf("\nMarca Inserida invalida!\n");
+			abbleToProceed = 0;
+		}
+		else
+		{
+			abbleToProceed = 1;
+		}
+	} while (abbleToProceed = 0);
 	// Modelo do produto
-	printf("\nInsira o modelo do produto: ");
-	fflush(stdin);
-	gets(produto->model.modeloproduto);
+	abbleToProceed = 0;
+	do
+	{
+
+		printf("\nInsira o modelo do produto: ");
+		fflush(stdin);
+		gets(produto->model.modeloproduto);
+		if (!produto->model.modeloproduto)
+		{
+			printf("\nModelo inserido invalida!\n");
+			abbleToProceed = 0;
+		}
+		else
+		{
+			abbleToProceed = 1;
+		}
+	} while (abbleToProceed = 0);
 	// Valor do produto
+	produto->cdProduto = generateCdProduto(produto->model.marcaproduto, produto->model.modeloproduto);
 	printf("\nInsira o valor do produto R$: ");
 	fflush(stdin);
 	scanf("%lf", &produto->valorProduto);
@@ -999,7 +1046,7 @@ int importProdutos(struct produto *produto, int contador)
 						printf("Nome do produto: %s\n", field);
 						strcpy(produto[contador + produtosImportados].nomeProduto, field);
 						// Colocamos aqui qual o código do produto
-						produto[contador + produtosImportados].cdProduto = contador + produtosImportados;
+						// produto[contador + produtosImportados].cdProduto = contador + produtosImportados;
 					}
 					// Modelo do produto
 					else if (strcmp(strlwr(field), "modelo") == 0)
@@ -1014,6 +1061,9 @@ int importProdutos(struct produto *produto, int contador)
 						field = strtok(NULL, ":");
 						printf("Marca do produto: %s\n", field);
 						strcpy(produto[contador + produtosImportados].model.marcaproduto, field);
+						// Definimos o codigo do produto
+						produto[contador + produtosImportados].cdProduto = generateCdProduto(produto[contador + produtosImportados].model.marcaproduto,
+																																								 produto[contador + produtosImportados].model.modeloproduto);
 					}
 					// Valor do produto
 					else if (strcmp(strlwr(field), "valor") == 0)
@@ -1390,4 +1440,123 @@ void inserirProdutosNaFila(struct produto *produto, int contador)
 	}
 	// Definimos para o último proximoProduto o próximo como null
 	produto[contador].proximoProduto = NULL;
+}
+
+int generateCdCliente(double cpfCliente)
+{
+
+	// Tamanho do CPF
+	int tamanhoCpf = 0;
+	// Transformamos o CPF em um inteiro e removemos os 2 ultimos numeros dele
+	int cpfEmInt = (int)(cpfCliente / 100);
+	// Criamos o fator de exponenciação
+	double expo = 1;
+	// Criamos o contador de quantas vezes dividimos o cpf
+	int contadorDivisao = 0;
+	// Criamos o valor inteiro a retornar;
+	int valorCdCliente;
+
+	// Recuperamos o valor da exponenciacao do CPF
+	for (size_t i = 0; cpfEmInt > 0; i++)
+	{
+		cpfEmInt /= 10;
+		tamanhoCpf++;
+	}
+
+	// Geramos o multiplo para gerarmos o int do CPF
+	for (size_t i = 0; i <= tamanhoCpf; i++)
+	{
+		expo = expo * 10;
+	}
+
+	// Concatenamos o valor do CPF de acordo com a divisão
+	while (contadorDivisao < 7)
+	{
+		valorCdCliente = (int)(cpfCliente / expo);
+		contadorDivisao++;
+		expo = expo / 10;
+	}
+	return valorCdCliente;
+}
+
+int generateCdProduto(char marcaProduto[20], char modeloProduto[20])
+{
+	char ASCIIModeloString[6],
+			ASCIIMarcaString[6],
+			randomString1[4],
+			randomString2[4],
+			randomString3[4];
+
+	int ASCIIMarca, ASCIIModelo,
+			cdProduto,
+			random1, random2, random3;
+
+	srand(time(0));
+	for (size_t i = 0; i < 10; i++)
+	{
+		int num = (rand() % (10 - 1 + 1)) + 1;
+		if (i == 0)
+		{
+			random1 = num;
+		}
+		else if (i == 1)
+		{
+			random2 = num;
+		}
+		else if (i == 2)
+		{
+			random3 = num;
+		}
+	}
+	ASCIIMarca = (int)marcaProduto[0];
+	ASCIIModelo = (int)modeloProduto[0];
+
+	sprintf(ASCIIModeloString, "%d", ASCIIModelo);
+	sprintf(ASCIIMarcaString, "%d", ASCIIMarca);
+
+	sprintf(randomString1, "%d", random1);
+	sprintf(randomString2, "%d", random2);
+	sprintf(randomString3, "%d", random3);
+
+	strcat(ASCIIMarcaString, ASCIIModeloString);
+	strcat(ASCIIMarcaString, randomString1);
+	strcat(ASCIIMarcaString, randomString2);
+	strcat(ASCIIMarcaString, randomString3);
+
+	cdProduto = atoi(ASCIIMarcaString);
+	return cdProduto;
+}
+
+void listarFilaClientes(struct listagemCLientes *listagemCLientes)
+{
+	if (listagemCLientes->primeiroCliente == NULL)
+	{
+		printf("Listagem de clientes vazia");
+	}
+	else
+	{
+		struct cliente *clienteAuxiliar = listagemCLientes->primeiroCliente;
+		while (clienteAuxiliar)
+		{
+			listarClientes(clienteAuxiliar);
+			clienteAuxiliar = clienteAuxiliar->proximoCliente;
+		}
+	}
+};
+
+struct listagemCLientes *criarListagemDeClientes()
+{
+	struct listagemCLientes *fila = (struct listagemCLientes *)malloc(sizeof(struct listagemCLientes));
+	fila->primeiroCliente = NULL;
+	fila->ultimoCliente = NULL;
+	return fila;
+};
+
+void inserirClienteNaListagem(struct listagemCLientes *listagemCLientes, struct cliente *cliente)
+{
+	if (listagemCLientes->ultimoCliente == NULL)
+	{
+		listagemCLientes->primeiroCliente = cliente;
+	}
+	listagemCLientes->ultimoCliente = cliente;
 }
