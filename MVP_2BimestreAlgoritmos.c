@@ -5,8 +5,8 @@
  * Willyan Fontana do Prado ---- 2008381
 */
 
-#include <stdio.h>;
-#include <string.h>;
+#include <stdio.h>
+#include <string.h>
 #include <stdlib.h>;
 
 // Definimos a estrutura dos clientes
@@ -86,11 +86,19 @@ void listarFilaClientes(struct listagemCLientes *listagemCLientes);
 // Interações do cliente
 void cadastraCliente(struct cliente *cliente, int contador), // Cadastro de cliente
 		listarClientes(struct cliente *cliente);								 // Listagem de cliente
+// Atribuição do cdCliente pelo cpf
+int generateCdCliente(double cpfCliente);
+// Encontra o cliente por cpf
+int encontraCliente(int maxVal, struct cliente *cliente);
 // ---------------------
 
 // Interações do produto
 void cadastraProdutos(struct produto *produto, int contador), // Cadastro de produtos
 		listarProdutos(struct produto *produto);									// Listagem de produtos
+// Gera o código do produto
+int generateCdProduto(char marcaProduto[20], char modeloProduto[20]);
+// Encontra o produto
+int encontraProduto(int maxVal, struct produto *produto);
 // ---------------------
 
 // Listagens de clientes
@@ -99,9 +107,11 @@ struct listagemCLientes *criarListagemDeClientes();
 void inserirClienteNaListagem(struct listagemCLientes *listagemCLientes, struct cliente *cliente);
 
 // Importação dos clientes
-int importClientes(struct cliente *cliente, int contador);
+int importClientes(struct cliente *cliente, int contador, struct listagemCLientes *listagemCLientes);
 // Ordenação de clientes nas filas
 void ordenaCliente(struct cliente *cliente, int contador);
+// Ordenação de produtos
+void ordenaProdutos(struct produto *produto, int contador);
 // Inserção de clientes no final da fila
 void inserirClienteNaFila(struct cliente *cliente, int contador);
 // Inserção de produtos no final da fila
@@ -158,8 +168,9 @@ int promptCompare(char prompt[2])
 	else
 		return 0;
 }
-// Atribuição do cdCliente pelo cpf
-int generateCdCliente(double cpfCliente);
+
+void mascaraTelefone(char telefone[20], struct cliente *cliente);
+void mascaraCelular(char celular[20], struct cliente *cliente);
 
 void main()
 {
@@ -302,6 +313,7 @@ void main()
 					{
 						cadastraCliente(&clientes[filaClientes], filaClientes);
 						inserirClienteNaFila(clientes, filaClientes);
+						inserirClienteNaListagem(listaDeClientes, &clientes[filaClientes]);
 						filaClientes++;
 						maxClientes = filaClientes;
 						printf("Cadastrar um novo cliente(S/n) ? ");
@@ -319,11 +331,12 @@ void main()
 					strlwr(gets(promptSimNao));
 					if (promptCompare(promptSimNao) == 1)
 					{
-						clientesImportados = importClientes(clientes, filaClientes);
+						clientesImportados = importClientes(clientes, filaClientes, listaDeClientes);
 						// Somamos a fila de clientes com as novas adições
 						// Utilizamos o +1 pois a fila de novos clientes começa em 0
 						filaClientes = filaClientes + clientesImportados;
 						inserirClienteNaFila(clientes, filaClientes);
+						// Inserimos os clientes na fila
 						filaClientes = filaClientes + 1;
 						maxClientes = filaClientes;
 						printf("\nClientes inseridos no sistema");
@@ -334,9 +347,6 @@ void main()
 			else
 			{
 				listarFilaClientes(listaDeClientes);
-				for (size_t i = 0; i < filaClientes; i++)
-				{
-				}
 			}
 			break;
 		case 3:
@@ -361,12 +371,12 @@ void main()
 			// Verificamos se os clientes foram importados
 			if (clientesImportados == 0)
 			{
-				clientesImportados = importClientes(clientes, filaClientes);
+				clientesImportados = importClientes(clientes, filaClientes, listaDeClientes);
 				// Somamos a fila de clientes com as novas adições
 				// Utilizamos o +1 pois a fila de novos clientes começa em 0
 				filaClientes = filaClientes + clientesImportados;
 				inserirClienteNaFila(clientes, filaClientes);
-				inserirClienteNaListagem(listaDeClientes, clientes);
+				// Inserimos os clientes na fila
 				filaClientes = filaClientes + 1;
 				maxClientes = filaClientes;
 				printf("\nClientes inseridos no sistema");
@@ -492,6 +502,7 @@ void main()
 					{
 						cadastraCliente(&clientes[filaClientes], filaClientes);
 						inserirClienteNaFila(clientes, filaClientes);
+						inserirClienteNaListagem(listaDeClientes, &clientes[filaClientes]);
 						filaClientes++;
 						maxClientes = filaClientes;
 						printf("Cadastrar um novo cliente(S/n) ? ");
@@ -509,11 +520,12 @@ void main()
 					strlwr(gets(promptSimNao));
 					if (promptCompare(promptSimNao) == 1)
 					{
-						clientesImportados = importClientes(clientes, filaClientes);
+						clientesImportados = importClientes(clientes, filaClientes, listaDeClientes);
 						// Somamos a fila de clientes com as novas adições
 						// Utilizamos o +1 pois a fila de novos clientes começa em 0
 						filaClientes = filaClientes + clientesImportados;
 						inserirClienteNaFila(clientes, filaClientes);
+						// Inserimos os clientes na fila
 						filaClientes = filaClientes + 1;
 						maxClientes = filaClientes;
 						printf("\nClientes inseridos no sistema");
@@ -639,7 +651,7 @@ void main()
 					else
 					{
 						contadorPadrao = 0;
-						printf("\nDeseja adicionar mais um produto? ");
+						printf("\nDeseja adicionar mais um produto (S/n)? ");
 						fflush(stdin);
 						strlwr(gets(promptSimNao));
 						fflush(stdin);
@@ -688,7 +700,7 @@ void main()
 						{
 							printf("e %s ", carrinho->produtosAComprar.mercadoria2->nomeProduto);
 						}
-						printf("para o cliente %s (S/n) ?", carrinho->comprador->nomeCliente);
+						printf("para o cliente %s (S/n) ? ", carrinho->comprador->nomeCliente);
 						fflush(stdin);
 						strlwr(gets(promptSimNao));
 						fflush(stdin);
@@ -755,13 +767,32 @@ void cadastraCliente(struct cliente *cliente, int contador)
 		gets(cliente->emailCliente);
 	} while (validaEmail(cliente->emailCliente) == 0);
 	// Telefone do cliente
-	printf("\nInsira o telefone fixo do cliente: ");
+	printf("\nInsira o telefone fixo do cliente (com DDD): ");
 	fflush(stdin);
 	gets(cliente->tel.telefone);
+	if (cliente->tel.telefone[0] != '\0')
+	{
+		mascaraTelefone(cliente->tel.telefone, cliente);
+	}
+	else
+	{
+		printf("\nTelefone nao informado");
+		strcpy(cliente->tel.telefone, "Desconhecido");
+	}
+
 	// Celular do cliente
-	printf("\nInsira o celular do cliente: ");
+	printf("\nInsira o celular do cliente (com DDD): ");
 	fflush(stdin);
 	gets(cliente->tel.celular);
+	if (cliente->tel.celular[0] != '\0')
+	{
+		mascaraCelular(cliente->tel.celular, cliente);
+	}
+	else
+	{
+		printf("\nCelular nao informado");
+		strcpy(cliente->tel.celular, "Desconhecido");
+	}
 	// Sexo do cliente:
 	do
 	{
@@ -798,7 +829,7 @@ void listarClientes(struct cliente *cliente)
 	return;
 }
 // Importação de clientes
-int importClientes(struct cliente *cliente, int contador)
+int importClientes(struct cliente *cliente, int contador, struct listagemCLientes *listagemCLientes)
 {
 	// Setamos a quantia de clientes importados
 	int clientesImportados = 0;
@@ -828,6 +859,8 @@ int importClientes(struct cliente *cliente, int contador)
 				// Caso seja um novo usuário
 				if (c == '\n')
 				{
+					inserirClienteNaFila(cliente, contador + clientesImportados);
+					inserirClienteNaListagem(listagemCLientes, &cliente[contador + clientesImportados]);
 					// Somamos a quantia de clientes no banco
 					clientesImportados++;
 					printf("\n\nClientes novo adicionado com sucesso\n\n");
@@ -891,15 +924,17 @@ int importClientes(struct cliente *cliente, int contador)
 					else if (strcmp(strlwr(field), "telefone") == 0)
 					{
 						field = strtok(NULL, ":");
-						printf("Telefone do usuario: %s\n", field);
 						strcpy(cliente[contador + clientesImportados].tel.telefone, field);
+						mascaraTelefone(cliente[contador + clientesImportados].tel.telefone, &cliente[contador + clientesImportados]);
+						printf("Telefone do usuario: %s\n", cliente[contador + clientesImportados].tel.telefone);
 					}
 					// Celular do usuário
 					else if (strcmp(strlwr(field), "celular") == 0)
 					{
 						field = strtok(NULL, ":");
-						printf("Celular do usuario: %s\n", field);
 						strcpy(cliente[contador + clientesImportados].tel.celular, field);
+						mascaraCelular(cliente[contador + clientesImportados].tel.celular, &cliente[contador + clientesImportados]);
+						printf("Celular do usuario: %s\n", cliente[contador + clientesImportados].tel.celular);
 					}
 					else
 					{
@@ -1099,15 +1134,13 @@ void realizaCompra(struct compra *compra, int produtosNaCompra)
 	compra->prcntDescontoCompra = 0;
 	char promptSimNao[2];
 	double valor_produto1 = compra->produtosAComprar.mercadoria1->valorProduto;
-	printf("Valor do produto: %0.2lf\n", valor_produto1);
-	fflush(stdin);
 	double valor_produto2,
 			subTotalProduto2,
 			subTotalProduto1;
 	// Validação da quantidade mínima de produtos a serem vendidos
 	do
 	{
-		printf("Quantas unidades do produto %s o cliente deseja levar?\n", compra->produtosAComprar.mercadoria1->nomeProduto);
+		printf("Quantas unidades do produto %s o cliente deseja levar (min 1)? ", compra->produtosAComprar.mercadoria1->nomeProduto);
 		fflush(stdin);
 		scanf("%d", &compra->qtVenda1);
 		if (compra->qtVenda1 <= 0)
@@ -1119,7 +1152,7 @@ void realizaCompra(struct compra *compra, int produtosNaCompra)
 	subTotalProduto1 = valor_produto1 * compra->qtVenda1;
 	compra->subTotalProduto1 = subTotalProduto1;
 	// Verificamos se o produto possuirá desconto
-	printf("O produto %s possui desconto  (S/n) ?", compra->produtosAComprar.mercadoria1->nomeProduto);
+	printf("O produto %s %s possui desconto (S/n)? ", compra->produtosAComprar.mercadoria1->nomeProduto, compra->produtosAComprar.mercadoria1->model.modeloproduto);
 	fflush(stdin);
 	strlwr(gets(promptSimNao));
 	fflush(stdin);
@@ -1157,7 +1190,7 @@ void realizaCompra(struct compra *compra, int produtosNaCompra)
 		// Validação da quantidade mínima de produtos a serem vendidos
 		do
 		{
-			printf("Quantas unidades do produto %s o cliente deseja levar?\n", compra->produtosAComprar.mercadoria2->nomeProduto);
+			printf("\nQuantas unidades do produto %s o cliente deseja levar (min 1)? ", compra->produtosAComprar.mercadoria2->nomeProduto);
 			fflush(stdin);
 			scanf("%d", &compra->qtVenda2);
 			if (compra->qtVenda2 <= 0)
@@ -1170,7 +1203,7 @@ void realizaCompra(struct compra *compra, int produtosNaCompra)
 		compra->subTotalProduto2 = subTotalProduto2;
 		compra->prcntDescontoCompra = 0;
 		// Verificamos se existe desconto para o produto 2
-		printf("O produto %s possui desconto?", compra->produtosAComprar.mercadoria2->nomeProduto);
+		printf("\nO produto %s %s possui desconto (S/n)? ", compra->produtosAComprar.mercadoria2->nomeProduto, compra->produtosAComprar.mercadoria2->model.modeloproduto);
 		fflush(stdin);
 		strlwr(gets(promptSimNao));
 		fflush(stdin);
@@ -1201,7 +1234,7 @@ void realizaCompra(struct compra *compra, int produtosNaCompra)
 		}
 	}
 	compra->valorTotalVenda = compra->subTotalCompra;
-	printf("Foram vendidos:\n%d unidades do produto %s no valor de %0.2lf", compra->qtVenda1, compra->produtosAComprar.mercadoria1->nomeProduto, compra->subTotalProduto1);
+	printf("\nForam vendidos:\n%d unidades do produto %s no valor de %0.2lf", compra->qtVenda1, compra->produtosAComprar.mercadoria1->nomeProduto, compra->subTotalProduto1);
 	if (produtosNaCompra == 2)
 	{
 		printf(" e tambem: \n%d unidades do produto %s no valor de %0.2lf", compra->qtVenda2, compra->produtosAComprar.mercadoria2->nomeProduto, compra->subTotalProduto2);
@@ -1442,6 +1475,7 @@ void inserirProdutosNaFila(struct produto *produto, int contador)
 	produto[contador].proximoProduto = NULL;
 }
 
+// Geramos o código do cliente de acordo com o CPF
 int generateCdCliente(double cpfCliente)
 {
 
@@ -1479,6 +1513,7 @@ int generateCdCliente(double cpfCliente)
 	return valorCdCliente;
 }
 
+// Geramos o código do produto de acordo com a marca modelo e randNum
 int generateCdProduto(char marcaProduto[20], char modeloProduto[20])
 {
 	char ASCIIModeloString[6],
@@ -1527,6 +1562,7 @@ int generateCdProduto(char marcaProduto[20], char modeloProduto[20])
 	return cdProduto;
 }
 
+// Listamos a fila de clientes
 void listarFilaClientes(struct listagemCLientes *listagemCLientes)
 {
 	if (listagemCLientes->primeiroCliente == NULL)
@@ -1544,6 +1580,7 @@ void listarFilaClientes(struct listagemCLientes *listagemCLientes)
 	}
 };
 
+// Criamos a listagem de clientes
 struct listagemCLientes *criarListagemDeClientes()
 {
 	struct listagemCLientes *fila = (struct listagemCLientes *)malloc(sizeof(struct listagemCLientes));
@@ -1552,6 +1589,7 @@ struct listagemCLientes *criarListagemDeClientes()
 	return fila;
 };
 
+// Inserimos o cliente na listagem
 void inserirClienteNaListagem(struct listagemCLientes *listagemCLientes, struct cliente *cliente)
 {
 	if (listagemCLientes->ultimoCliente == NULL)
@@ -1560,3 +1598,90 @@ void inserirClienteNaListagem(struct listagemCLientes *listagemCLientes, struct 
 	}
 	listagemCLientes->ultimoCliente = cliente;
 }
+
+// Geramos a string do telefone
+void mascaraTelefone(char telefone[20], struct cliente *cliente)
+{
+	// Criamos um telefone de retorno
+	char telefoneEditado[20];
+	if (telefone[0] != '\0')
+	{
+		int nonDigitRemoved = 0;
+
+		// Remoção de caracteres não digitos
+		for (size_t i = 0; i < strlen(telefone); i++)
+		{
+			if (telefone[i] < '0' || telefone[i] > '9')
+			{
+				nonDigitRemoved++;
+			}
+			// Removemos os caracteres especiais do array
+			telefone[i] = telefone[i + nonDigitRemoved];
+		}
+
+		// Populamos os valores corretos dos telefones
+		telefoneEditado[0] = (char)40;
+		telefoneEditado[1] = telefone[0];
+		telefoneEditado[2] = telefone[1];
+		telefoneEditado[3] = (char)41;
+		telefoneEditado[4] = (char)32;
+		telefoneEditado[5] = telefone[2];
+		telefoneEditado[6] = telefone[3];
+		telefoneEditado[7] = telefone[4];
+		telefoneEditado[8] = telefone[5];
+		telefoneEditado[9] = (char)45;
+		telefoneEditado[10] = telefone[6];
+		telefoneEditado[11] = telefone[7];
+		telefoneEditado[12] = telefone[8];
+		telefoneEditado[13] = telefone[9];
+		telefoneEditado[14] = NULL;
+	}
+	// Colocamos o novo valor na string do usuario
+	strcpy(cliente->tel.telefone, telefoneEditado);
+	return;
+};
+
+// Geramos a string do celular
+void mascaraCelular(char celular[20], struct cliente *cliente)
+{
+	char celularEditado[20];
+	if (celular[0] != '\0')
+	{
+		int nonDigitRemoved = 0;
+		// Remoção de caracteres não digitos
+		for (size_t i = 0; i < strlen(celular); i++)
+		{
+			if (celular[i] < '0' || celular[i] > '9')
+			{
+				nonDigitRemoved++;
+			}
+			// Removemos os caracteres especiais do array
+			celular[i] = celular[i + nonDigitRemoved];
+		}
+		// Populamos os valores corretos dos celulares
+		celularEditado[0] = (char)40;
+		celularEditado[1] = celular[0];
+		celularEditado[2] = celular[1];
+		celularEditado[3] = (char)41;
+		celularEditado[4] = (char)32;
+
+		celularEditado[5] = celular[2];
+
+		celularEditado[6] = (char)32;
+
+		celularEditado[7] = celular[3];
+		celularEditado[8] = celular[4];
+		celularEditado[9] = celular[5];
+		celularEditado[10] = celular[6];
+		celularEditado[11] = (char)45;
+		celularEditado[12] = celular[7];
+		celularEditado[13] = celular[8];
+		celularEditado[14] = celular[9];
+		celularEditado[15] = celular[10];
+		celularEditado[16] = celular[11];
+		celularEditado[17] = NULL;
+	}
+	// Colocamos o novo valor na string do usuario
+	strcpy(cliente->tel.celular, celularEditado);
+	return;
+};
