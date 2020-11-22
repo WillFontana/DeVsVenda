@@ -197,7 +197,7 @@ void main()
 
 	client *clientes; // Definimos nossa tabela de clientes
 	// typecast
-	clientes = (client *)calloc(1, sizeof(client)); // Alocamos espaço para o cliente
+	clientes = (client *)calloc(50, sizeof(client)); // Alocamos espaço para o cliente
 	if (clientes == NULL)
 	{
 		printf("Erro ao alocar espaco para os clientes");
@@ -208,7 +208,7 @@ void main()
 	clientes->clienteAnterior = NULL;
 
 	product *produtos;
-	produtos = (product *)calloc(1, sizeof(product)); // Alocamos espaço para o produto
+	produtos = (product *)calloc(50, sizeof(product)); // Alocamos espaço para o produto
 	if (produtos == NULL)
 	{
 		printf("Erro ao alocar espaco para os produtos");
