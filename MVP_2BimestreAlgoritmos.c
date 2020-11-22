@@ -237,7 +237,7 @@ void main()
 		printf("\t|\t2 Vizualizar Clientes\n");
 		printf("3 Importar Produdos");
 		printf("\t|\t4 Importar Clientes\n");
-		printf("5 Encontrar Produdos");
+		printf("5 Ordenar Produdos");
 		printf("\t|\t6 Ordenar Clientes\n");
 		printf("7 Encontrar Produtos");
 		printf("\t|\t8 Encontrar Clientes\n");
@@ -1379,10 +1379,11 @@ void ordenaCliente(struct cliente *cliente, int contador)
 	// Definimos o ultimo e o primeiro cliente da fila novamente
 	cliente[contador].proximoCliente = NULL;
 	cliente[0].clienteAnterior = NULL;
-	for (size_t k = 0; k < contador; k++)
-	{
-		listarClientes(&cliente[k]);
-	}
+	// for (size_t k = 0; k < contador; k++)
+	// {
+	// 	listarClientes(&cliente[k]);
+	// }
+	printf("Clientes ordenados com sucesso!");
 };
 void ordenaProdutos(struct produto *produto, int contador)
 {
@@ -1435,10 +1436,11 @@ void ordenaProdutos(struct produto *produto, int contador)
 	// Definimos o ultimo e o primeiro cliente da fila novamente
 	produto[contador].proximoProduto = NULL;
 	produto[0].produtoAnterior = NULL;
-	for (size_t k = 0; k < contador; k++)
-	{
-		listarProdutos(&produto[k]);
-	}
+	// for (size_t k = 0; k < contador; k++)
+	// {
+	// 	listarProdutos(&produto[k]);
+	// }
+	printf("Produtos ordenados com sucesso!");
 };
 
 // Criação de filas
@@ -1604,6 +1606,7 @@ void mascaraTelefone(char telefone[20], struct cliente *cliente)
 {
 	// Criamos um telefone de retorno
 	char telefoneEditado[20];
+	char telNulo[] = "Desconhecido";
 	if (telefone[0] != '\0')
 	{
 		int nonDigitRemoved = 0;
@@ -1635,9 +1638,14 @@ void mascaraTelefone(char telefone[20], struct cliente *cliente)
 		telefoneEditado[12] = telefone[8];
 		telefoneEditado[13] = telefone[9];
 		telefoneEditado[14] = NULL;
+		strcpy(cliente->tel.telefone, telefoneEditado);
+	}
+	else
+	{
+		strcpy(cliente->tel.telefone, telNulo);
 	}
 	// Colocamos o novo valor na string do usuario
-	strcpy(cliente->tel.telefone, telefoneEditado);
+
 	return;
 };
 
@@ -1645,6 +1653,7 @@ void mascaraTelefone(char telefone[20], struct cliente *cliente)
 void mascaraCelular(char celular[20], struct cliente *cliente)
 {
 	char celularEditado[20];
+	char celNulo[] = "Desconhecido";
 	if (celular[0] != '\0')
 	{
 		int nonDigitRemoved = 0;
@@ -1680,8 +1689,12 @@ void mascaraCelular(char celular[20], struct cliente *cliente)
 		celularEditado[15] = celular[10];
 		celularEditado[16] = celular[11];
 		celularEditado[17] = NULL;
+		strcpy(cliente->tel.celular, celularEditado);
+	}
+	else
+	{
+		strcpy(cliente->tel.celular, celNulo);
 	}
 	// Colocamos o novo valor na string do usuario
-	strcpy(cliente->tel.celular, celularEditado);
 	return;
 };
