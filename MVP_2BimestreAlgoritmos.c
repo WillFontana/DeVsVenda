@@ -1,9 +1,3 @@
-/*
- * Integrantes
- * Carlos Henrique Moreira Diniz ---- 2000118
- * Luana Maria Albertoni ---- 2012683
- * Willyan Fontana do Prado ---- 2008381
-*/
 
 #include <stdio.h>
 #include <string.h>
@@ -62,9 +56,9 @@ struct compra
 	struct cliente *comprador;
 	struct produtosNaCompra produtosAComprar;
 	int cdCompra,						 // Identificação da compra do produto
-			relacaoCliente,			 // Relação da compra com o  usuario
-			relacaoProduto1,		 // Relação da compra com o produto 1
-			relacaoProduto2,		 // Relação da compra com o produto 2
+			relacaoCliente,			 // Rela��o da compra com o  usuario
+			relacaoProduto1,		 // Rela��o da compra com o produto 1
+			relacaoProduto2,		 // Rela��o da compra com o produto 2
 			qtVenda1,						 // Quantidade de produtos 1 vendidos
 			qtVenda2;						 // Quantidade de produtos 2 vendidos
 	double subTotalCompra,	 // Subtotal padrao do produto
@@ -83,19 +77,19 @@ struct listagemCLientes
 
 void listarFilaClientes(struct listagemCLientes *listagemCLientes);
 
-// Interações do cliente
+// Intera��es do cliente
 void cadastraCliente(struct cliente *cliente, int contador), // Cadastro de cliente
 		listarClientes(struct cliente *cliente);								 // Listagem de cliente
-// Atribuição do cdCliente pelo cpf
+// Atribui��o do cdCliente pelo cpf
 int generateCdCliente(double cpfCliente);
 // Encontra o cliente por cpf
 int encontraCliente(int maxVal, struct cliente *cliente);
 // ---------------------
 
-// Interações do produto
+// Intera��es do produto
 void cadastraProdutos(struct produto *produto, int contador), // Cadastro de produtos
 		listarProdutos(struct produto *produto);									// Listagem de produtos
-// Gera o código do produto
+// Gera o c�digo do produto
 int generateCdProduto(char marcaProduto[20], char modeloProduto[20]);
 // Encontra o produto
 int encontraProduto(int maxVal, struct produto *produto);
@@ -106,48 +100,48 @@ struct listagemCLientes *criarListagemDeClientes();
 
 void inserirClienteNaListagem(struct listagemCLientes *listagemCLientes, struct cliente *cliente);
 
-// Importação dos clientes
+// Importa��o dos clientes
 int importClientes(struct cliente *cliente, int contador, struct listagemCLientes *listagemCLientes);
-// Ordenação de clientes nas filas
+// Ordena��o de clientes nas filas
 void ordenaCliente(struct cliente *cliente, int contador);
-// Ordenação de produtos
+// Ordena��o de produtos
 void ordenaProdutos(struct produto *produto, int contador);
-// Inserção de clientes no final da fila
+// Inser��o de clientes no final da fila
 void inserirClienteNaFila(struct cliente *cliente, int contador);
-// Inserção de produtos no final da fila
+// Inser��o de produtos no final da fila
 void inserirProdutosNaFila(struct produto *produto, int contador);
-// Importação dos produtos
+// Importa��o dos produtos
 int importProdutos(struct produto *produto, int contador);
-// Realização de compras
+// Realiza��o de compras
 void realizaCompra(struct compra *compra, int produtosNaCompra);
-// Validação de email'
+// Valida��o de email'
 int validaEmail(char email[50])
 {
-	// Se o @ e o .com não existir invalida o email
+	// Se o @ e o .com n�o existir invalida o email
 	if (strstr(email, "@") == NULL && strstr(email, ".com") == NULL)
 	{
 		printf("\nO email inserido nao eh valido\n\n");
 		return 0;
 	}
-	// Se o @ existir e o .com não existir invalida o email
+	// Se o @ existir e o .com n�o existir invalida o email
 	else if (strstr(email, "@") != NULL && strstr(email, ".com") == NULL)
 	{
 		printf("\nO email inserido nao eh valido\n\n");
 		return 0;
 	}
-	// Se o @ não existir e o .com existir invalida o email
+	// Se o @ n�o existir e o .com existir invalida o email
 	else if (strstr(email, "@") == NULL && strstr(email, ".com") != NULL)
 	{
 		printf("\nO email inserido nao eh valido\n\n");
 		return 0;
 	}
-	// Se houver @ e .com o email é valido
+	// Se houver @ e .com o email � valido
 	else
 	{
 		return 1;
 	}
 }
-// Validação do sexo
+// Valida��o do sexo
 int validaSexo(char sexo[2])
 {
 	if (strcmp(strlwr(sexo), "f") != 0 && strcmp(strlwr(sexo), "m") != 0 && strcmp(strlwr(sexo), "o") != 0)
@@ -176,7 +170,7 @@ void main()
 {
 
 	printf("---{ Iniciando o sistema! }---\n");
-	// Declaração das variáveis de controle gerais
+	// Declara��o das vari�veis de controle gerais
 	char promptSimNao[2];				// Resposta do usuário (Qualquer caractere diferente de s é considerado não pelo sistema);
 	int filaClientes = 0,				// Contador de clientes
 			filaProdutos = 0,				// Contador de produtos
@@ -189,15 +183,15 @@ void main()
 			produtosNaCompra,				// Quantia de produtos diferentes vendidos
 			escolhaMenu;						// Escolha do menu
 
-	// Variáveis para busca binária
+	// Vari�veis para busca bin�ria
 	int base = 0, maxProdutos = filaProdutos, maxClientes = filaClientes;
 
 	// Criamos nossas listagens
 	struct listagemCLientes *listaDeClientes = criarListagemDeClientes();
 
-	client *clientes; // Definimos nossa tabela de clientes
-	// typecast
-	clientes = (client *)calloc(100, sizeof(client)); // Alocamos espaço para o cliente
+	client *clientes; // Defino a tabela de clientes
+	
+	clientes = (client *)calloc(100, sizeof(client)); // Alocamos espa�o para o cliente
 	if (clientes == NULL)
 	{
 		printf("Erro ao alocar espaco para os clientes");
@@ -282,7 +276,7 @@ void main()
 					if (promptCompare(promptSimNao) == 1)
 					{
 						produtosImportados = importProdutos(produtos, filaProdutos);
-						// Somamos a fila de produtos com as novas adições
+						// Somamos a fila de produtos com as novas adi��es
 						// Utilizamos o +1 pois a fila de novos produtos começa em 0
 						filaProdutos = filaProdutos + produtosImportados + 1;
 						maxProdutos = filaProdutos;
@@ -293,6 +287,7 @@ void main()
 			}
 			else
 			{
+				char i;
 				for (size_t i = 0; i < filaProdutos; i++)
 				{
 					listarProdutos(&produtos[i]);
@@ -332,7 +327,7 @@ void main()
 					if (promptCompare(promptSimNao) == 1)
 					{
 						clientesImportados = importClientes(clientes, filaClientes, listaDeClientes);
-						// Somamos a fila de clientes com as novas adições
+						// Somamos a fila de clientes com as novas adi��es
 						// Utilizamos o +1 pois a fila de novos clientes começa em 0
 						filaClientes = filaClientes + clientesImportados;
 						inserirClienteNaFila(clientes, filaClientes);
@@ -354,7 +349,7 @@ void main()
 			if (produtosImportados == 0)
 			{
 				produtosImportados = importProdutos(produtos, filaProdutos);
-				// Somamos a fila de produtos com as novas adições
+				// Somamos a fila de produtos com as novas adi��es
 				// Utilizamos o +1 pois a fila de novos produtos começa em 0
 				filaProdutos = filaProdutos + produtosImportados + 1;
 				maxProdutos = filaProdutos;
@@ -367,12 +362,12 @@ void main()
 			}
 			printf("\nRetornando ao menu inicial\n");
 			break;
-		case 4: // Importação de clientes
+		case 4: // Importa��o de clientes
 			// Verificamos se os clientes foram importados
 			if (clientesImportados == 0)
 			{
 				clientesImportados = importClientes(clientes, filaClientes, listaDeClientes);
-				// Somamos a fila de clientes com as novas adições
+				// Somamos a fila de clientes com as novas adi��es
 				// Utilizamos o +1 pois a fila de novos clientes começa em 0
 				filaClientes = filaClientes + clientesImportados;
 				inserirClienteNaFila(clientes, filaClientes);
@@ -388,7 +383,7 @@ void main()
 			}
 			printf("\nRetornando ao menu inicial\n");
 			break;
-		case 5: // Ordenação de clientes por CPF
+		case 5: // Ordena��o de clientes por CPF
 			if (filaProdutos == 0)
 			{
 				printf("\nO sistema ainda nao possui produtos para ordenar!\n");
@@ -399,7 +394,7 @@ void main()
 				printf("Produtos ordenados com sucesso!");
 			}
 			break;
-		case 6: // Ordenação de clientes por CPF
+		case 6: // Ordena��o de clientes por CPF
 			if (filaClientes == 0)
 			{
 				printf("\nO sistema ainda nao possui clientes para ordenar!\n");
